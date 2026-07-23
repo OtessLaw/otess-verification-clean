@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Search, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Send, MessageSquare, ShieldCheck, UserCheck, Smartphone, Clock, Copy, Loader, History } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Send, MessageSquare, ShieldCheck, UserCheck, Smartphone, Clock, Copy, Loader, History, ExternalLink, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminPending = () => {
@@ -438,6 +439,39 @@ const AdminPending = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Quick Verification Link Card at the Bottom */}
+      <div className="bg-gradient-to-r from-[#2563eb] to-indigo-600 rounded-2xl p-6 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-white/20 backdrop-blur-md rounded-xl text-white">
+            <ExternalLink size={24} />
+          </div>
+          <div>
+            <h3 className="font-outfit font-bold text-lg">Proceed to Verification</h3>
+            <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
+              Done picking customer numbers? Click below to open the Verification Tool or Bulk Upload portal immediately.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
+          <Link
+            to="/verify"
+            target="_blank"
+            className="flex-1 sm:flex-none px-5 py-3 bg-white text-[#2563eb] hover:bg-blue-50 font-bold rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2"
+          >
+            <span>Open Verification Portal</span>
+            <ExternalLink size={15} />
+          </Link>
+          <Link
+            to="/admin/upload"
+            className="flex-1 sm:flex-none px-5 py-3 bg-blue-700/80 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all border border-blue-400/30 flex items-center justify-center gap-2"
+          >
+            <span>Bulk Upload</span>
+            <ArrowRight size={15} />
+          </Link>
+        </div>
       </div>
     </div>
   );
