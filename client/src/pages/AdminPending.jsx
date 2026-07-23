@@ -456,21 +456,15 @@ const AdminPending = () => {
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
-          <Link
-            to="/verify"
+          <a
+            href="https://getmyzta.shop/"
             target="_blank"
-            className="flex-1 sm:flex-none px-5 py-3 bg-white text-[#2563eb] hover:bg-blue-50 font-bold rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2"
+            rel="noopener noreferrer"
+            className="flex-1 sm:flex-none px-6 py-3.5 bg-white text-[#2563eb] hover:bg-blue-50 font-extrabold rounded-xl text-xs sm:text-sm transition-all shadow-lg flex items-center justify-center gap-2"
           >
-            <span>Open Verification Portal</span>
-            <ExternalLink size={15} />
-          </Link>
-          <Link
-            to="/admin/upload"
-            className="flex-1 sm:flex-none px-5 py-3 bg-blue-700/80 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all border border-blue-400/30 flex items-center justify-center gap-2"
-          >
-            <span>Bulk Upload</span>
-            <ArrowRight size={15} />
-          </Link>
+            <span>Open Verification Portal (getmyzta.shop)</span>
+            <ExternalLink size={16} />
+          </a>
         </div>
       </div>
     </div>
