@@ -7,6 +7,15 @@ const AuthContext = createContext();
 // Configure axios base URL
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
 
+// Axios Request Interceptor: ALWAYS attach token from localStorage before any request goes out
+axios.interceptors.request.use((config) => {
+  const storedToken = localStorage.getItem('token');
+  if (storedToken) {
+    config.headers['Authorization'] = `Bearer ${storedToken}`;
+  }
+  return config;
+}, (error) => Promise.reject(error));
+
 export const AuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
@@ -23,7 +32,7 @@ export const AuthProvider = ({ children }) => {
           setAdmin(res.data.admin || { email: 'admin@nvs.com' });
         })
         .catch(err => {
-          console.error("Profile load failed, resetting token", err);
+          console.error("Profile load failed", err);
           if (err.response?.status === 401) {
             logout();
           } else {
@@ -47,6 +56,8 @@ export const AuthProvider = ({ children }) => {
       const { token: receivedToken, admin: adminData } = response.data;
       setToken(receivedToken);
       setAdmin(adminData || { email });
+      axios.defaults.headers.common['Authorization'] = `Bearer ${receivedToken}`;
+      localStorage.setItem('token', receivedToken);
       toast.success('Successfully logged in!');
       return true;
     } catch (error) {
@@ -59,6 +70,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setAdmin(null);
+    delete axios.defaults.headers.common['Authorization'];
     localStorage.removeItem('token');
     toast.success('Logged out successfully');
   };

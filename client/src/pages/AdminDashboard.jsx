@@ -14,7 +14,7 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (retries = 2) => {
     try {
       setLoading(true);
       const res = await axios.get('/api/admin/dashboard-stats');
@@ -24,6 +24,11 @@ const AdminDashboard = () => {
         setChartData(res.data.chartData || []);
       }
     } catch (error) {
+      if (retries > 0) {
+        // Wait 400ms and retry if token was initializing on fresh load
+        setTimeout(() => fetchDashboardData(retries - 1), 400);
+        return;
+      }
       toast.error('Failed to load dashboard data');
       console.error(error);
     } finally {
@@ -32,7 +37,7 @@ const AdminDashboard = () => {
   };
 
   if (loading) {
-    return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
+    return <div className="p-8 text-center text-slate-500 dark:text-slate-400">Loading dashboard...</div>;
   }
 
   const statCards = [
