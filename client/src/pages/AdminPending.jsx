@@ -359,16 +359,16 @@ const AdminPending = () => {
                       <td className="px-4 py-4 text-xs text-slate-400">
                         {new Date(item.submittedAt || item.submittedDate || item.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-2">
                           {(isPending || isProcessing) && (
                             <>
                               {isPending && (
                                 <button
                                   onClick={() => handleProcess(id)}
                                   disabled={!!currentLoading}
-                                  className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
-                                  title="Mark as Processing (Picked for Verification)"
+                                  className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
+                                  title="Mark as Processing"
                                 >
                                   <Loader size={13} />
                                   <span>Process</span>
@@ -377,20 +377,11 @@ const AdminPending = () => {
                               <button
                                 onClick={() => handleApprove(id)}
                                 disabled={!!currentLoading}
-                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
-                                title="Approve & Send SMS with Phone Number"
+                                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
+                                title="Approve & Send SMS"
                               >
                                 <CheckCircle size={13} />
                                 <span>Approve</span>
-                              </button>
-                              <button
-                                onClick={() => handleReject(id)}
-                                disabled={!!currentLoading}
-                                className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
-                                title="Reject & Send SMS with Phone Number"
-                              >
-                                <XCircle size={13} />
-                                <span>Reject</span>
                               </button>
                             </>
                           )}
@@ -399,7 +390,7 @@ const AdminPending = () => {
                             <button
                               onClick={() => handleResendSMS(id)}
                               disabled={!!currentLoading}
-                              className="px-2 py-1 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
+                              className="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
                               title="Resend SMS Notification to Agent"
                             >
                               <Send size={12} />
@@ -409,7 +400,7 @@ const AdminPending = () => {
 
                           <button 
                             onClick={() => handleDelete(id)} 
-                            className="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                            className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
                             title="Delete Record"
                           >
                             <Trash2 size={15} />
