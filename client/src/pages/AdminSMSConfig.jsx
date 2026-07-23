@@ -246,9 +246,9 @@ export default function AdminSMSConfig() {
           <div className="bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-xl rounded-2xl border border-slate-100 dark:border-slate-800 p-6 md:p-8 shadow-xl space-y-4">
             <h2 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
               <Globe size={20} className="text-[#2563eb]" />
-              <span>Site Logo URL (Top Right Header)</span>
+              <span>Site Logo URL (Left Header - Mobile & Desktop)</span>
             </h2>
-            <p className="text-xs text-slate-500">Paste your logo image URL to display your custom brand logo in the top right corner of the site header.</p>
+            <p className="text-xs text-slate-500">Paste your logo image URL to display your brand logo on the top left of the site header across mobile phones and desktop computers.</p>
 
             <div className="space-y-3">
               <label className="block text-xs font-bold text-slate-500">Logo Image URL</label>

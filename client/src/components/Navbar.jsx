@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -33,18 +33,33 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 transition-colors">
+    <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-[#2563eb] rounded-xl flex items-center justify-center text-white shadow-md shadow-[#2563eb]/20">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-outfit font-extrabold tracking-tight text-[#2563eb] dark:text-blue-400 text-lg sm:text-xl leading-none">OtessData</span>
-              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide">OTESS Phone Number Verification</span>
-            </div>
+          
+          {/* Left Brand Logo (Replaces default logo if custom URL exists & works on Mobile + Desktop) */}
+          <Link to="/" className="flex items-center space-x-3 shrink-0">
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt="Brand Logo" 
+                className="h-9 sm:h-10 w-auto max-w-[140px] sm:max-w-[220px] object-contain rounded-lg"
+                onError={(e) => {
+                  // Fallback to default branding if image link breaks
+                  setLogoUrl('');
+                }}
+              />
+            ) : (
+              <>
+                <div className="w-10 h-10 bg-[#2563eb] rounded-xl flex items-center justify-center text-white shadow-md shadow-[#2563eb]/20">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-outfit font-extrabold tracking-tight text-[#2563eb] dark:text-blue-400 text-lg sm:text-xl leading-none">OtessData</span>
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide">OTESS Phone Number Verification</span>
+                </div>
+              </>
+            )}
           </Link>
 
           {/* Desktop Nav */}
@@ -67,7 +82,7 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Utilities */}
+          {/* Right Utilities */}
           <div className="flex items-center space-x-3">
             <button
               onClick={toggleTheme}
@@ -109,17 +124,6 @@ export default function Navbar() {
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-            {/* Top Right Custom Brand Logo */}
-            {logoUrl && (
-              <div className="flex items-center pl-2 border-l border-slate-200 dark:border-slate-800">
-                <img 
-                  src={logoUrl} 
-                  alt="Custom Brand Logo" 
-                  className="h-9 w-auto max-w-[120px] sm:max-w-[150px] object-contain rounded-lg"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              </div>
-            )}
           </div>
         </div>
       </div>
