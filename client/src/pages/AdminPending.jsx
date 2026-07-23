@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Send, MessageSquare, ShieldCheck, UserCheck, Smartphone, Clock, Check, History } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Send, MessageSquare, ShieldCheck, UserCheck, Smartphone, Clock, Copy, Loader, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminPending = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('pending'); // Default to pending queue only!
+  const [statusFilter, setStatusFilter] = useState('pending'); // Default to pending queue!
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ total: 0, pages: 1 });
   const [selectedIds, setSelectedIds] = useState([]);
   const [actionLoading, setActionLoading] = useState({});
+
+  const LIMIT = 20; // 20 numbers per page!
 
   useEffect(() => {
     fetchData();
@@ -20,7 +22,7 @@ const AdminPending = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`/api/admin/pending?page=${page}&limit=10&status=${statusFilter}&search=${search}`);
+      const res = await axios.get(`/api/admin/pending?page=${page}&limit=${LIMIT}&status=${statusFilter}&search=${search}`);
       if (res.data.success) {
         setData(res.data.data);
         setPagination(res.data.pagination);
@@ -30,6 +32,21 @@ const AdminPending = () => {
       toast.error('Failed to load verification requests');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleProcess = async (id) => {
+    setActionLoading(prev => ({ ...prev, [id]: 'processing' }));
+    try {
+      const res = await axios.put(`/api/admin/pending/${id}/process`);
+      if (res.data.success) {
+        toast.success('Marked request as Processing 🔵');
+        fetchData();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update status');
+    } finally {
+      setActionLoading(prev => ({ ...prev, [id]: null }));
     }
   };
 
@@ -91,6 +108,19 @@ const AdminPending = () => {
     }
   };
 
+  const handleBulkProcess = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      const res = await axios.post('/api/admin/pending/bulk-process', { ids: selectedIds });
+      if (res.data.success) {
+        toast.success(res.data.message || 'Marked selected items as Processing 🔵');
+        fetchData();
+      }
+    } catch (error) {
+      toast.error('Failed bulk process');
+    }
+  };
+
   const handleBulkApprove = async () => {
     if (selectedIds.length === 0) return;
     try {
@@ -117,6 +147,27 @@ const AdminPending = () => {
     }
   };
 
+  // Copy customer numbers to clipboard for quick verification
+  const handleCopyNumbers = () => {
+    let numbersToCopy = [];
+    if (selectedIds.length > 0) {
+      numbersToCopy = data
+        .filter(item => selectedIds.includes(item._id || item.id))
+        .map(item => item.customerNumber || item.phoneNumber);
+    } else {
+      numbersToCopy = data.map(item => item.customerNumber || item.phoneNumber);
+    }
+
+    if (!numbersToCopy.length) {
+      toast.error('No customer numbers available to copy');
+      return;
+    }
+
+    const textToCopy = numbersToCopy.join('\n');
+    navigator.clipboard.writeText(textToCopy);
+    toast.success(`Copied ${numbersToCopy.length} customer numbers to clipboard! 📋`);
+  };
+
   const toggleSelectAll = () => {
     if (selectedIds.length === data.length && data.length > 0) {
       setSelectedIds([]);
@@ -139,37 +190,52 @@ const AdminPending = () => {
         <div>
           <h1 className="font-outfit text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <ShieldCheck className="text-[#2563eb]" size={28} />
-            <span>Verification Queue & SMS Dispatcher</span>
+            <span>Verification Queue & Batch Picker (20 / Page)</span>
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            When approved, requests immediately leave the pending queue, get added to Verified Numbers, and send an SMS alert containing the phone number to the agent.
+            Pick numbers for verification, mark them as Processing, copy customer numbers in bulk, and approve/reject with automated SMS.
           </p>
         </div>
+
+        <button
+          onClick={handleCopyNumbers}
+          className="px-4 py-2.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-2 self-start sm:self-auto"
+          title="Copy customer numbers line by line to clipboard for verification"
+        >
+          <Copy size={16} />
+          <span>Copy {selectedIds.length ? `${selectedIds.length} Selected` : 'Page'} Numbers</span>
+        </button>
       </div>
 
-      {/* Queue Tabs */}
+      {/* Queue Filter Tabs */}
       <div className="flex bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 gap-1 flex-wrap">
         <button
           onClick={() => { setStatusFilter('pending'); setPage(1); }}
-          className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs transition-all ${statusFilter === 'pending' ? 'bg-white dark:bg-[#1e293b] text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs transition-all ${statusFilter === 'pending' ? 'bg-white dark:bg-[#1e293b] text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
         >
           <Clock size={16} /> Pending Queue
         </button>
         <button
+          onClick={() => { setStatusFilter('processing'); setPage(1); }}
+          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs transition-all ${statusFilter === 'processing' ? 'bg-white dark:bg-[#1e293b] text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+        >
+          <Loader size={16} /> Processing Queue
+        </button>
+        <button
           onClick={() => { setStatusFilter('approved'); setPage(1); }}
-          className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs transition-all ${statusFilter === 'approved' ? 'bg-white dark:bg-[#1e293b] text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs transition-all ${statusFilter === 'approved' ? 'bg-white dark:bg-[#1e293b] text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
         >
           <CheckCircle size={16} /> Approved History
         </button>
         <button
           onClick={() => { setStatusFilter('rejected'); setPage(1); }}
-          className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs transition-all ${statusFilter === 'rejected' ? 'bg-white dark:bg-[#1e293b] text-rose-600 dark:text-rose-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs transition-all ${statusFilter === 'rejected' ? 'bg-white dark:bg-[#1e293b] text-rose-600 dark:text-rose-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
         >
           <XCircle size={16} /> Rejected History
         </button>
         <button
           onClick={() => { setStatusFilter('all'); setPage(1); }}
-          className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs transition-all ${statusFilter === 'all' ? 'bg-white dark:bg-[#1e293b] text-[#2563eb] shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs transition-all ${statusFilter === 'all' ? 'bg-white dark:bg-[#1e293b] text-[#2563eb] shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
         >
           <History size={16} /> All Requests
         </button>
@@ -190,17 +256,22 @@ const AdminPending = () => {
             </div>
           </div>
           
-          {selectedIds.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500 mr-2">{selectedIds.length} selected</span>
-              <button onClick={handleBulkApprove} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
-                <CheckCircle size={15} /> Approve & Send SMS
-              </button>
-              <button onClick={handleBulkReject} className="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
-                <XCircle size={15} /> Reject & Send SMS
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {selectedIds.length > 0 && (
+              <>
+                <span className="text-xs font-semibold text-slate-500 mr-1">{selectedIds.length} selected</span>
+                <button onClick={handleBulkProcess} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                  <Loader size={14} /> Mark Processing
+                </button>
+                <button onClick={handleBulkApprove} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                  <CheckCircle size={14} /> Approve & SMS
+                </button>
+                <button onClick={handleBulkReject} className="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                  <XCircle size={14} /> Reject & SMS
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -232,13 +303,13 @@ const AdminPending = () => {
                   <td colSpan="8" className="px-6 py-12 text-center text-slate-400">
                     <Clock size={32} className="mx-auto mb-2 opacity-30" />
                     <p className="font-semibold">No requests found in this view.</p>
-                    {statusFilter === 'pending' && <p className="text-xs text-slate-400 mt-1">Pending queue is empty! Approved items automatically move to "Approved History".</p>}
                   </td>
                 </tr>
               ) : (
                 data.map(item => {
                   const id = item._id || item.id;
                   const isPending = item.status === 'pending';
+                  const isProcessing = item.status === 'processing';
                   const isApproved = item.status === 'approved';
                   const isRejected = item.status === 'rejected';
                   const currentLoading = actionLoading[id];
@@ -267,10 +338,11 @@ const AdminPending = () => {
                       <td className="px-4 py-4">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
                           isApproved ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' :
+                          isProcessing ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' :
                           isRejected ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' :
                           'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                         }`}>
-                          {isApproved ? '🟢 Approved' : isRejected ? '🔴 Rejected' : '🟡 Pending'}
+                          {isApproved ? '🟢 Approved' : isProcessing ? '🔵 Processing' : isRejected ? '🔴 Rejected' : '🟡 Pending'}
                         </span>
                       </td>
                       <td className="px-4 py-4">
@@ -288,48 +360,59 @@ const AdminPending = () => {
                         {new Date(item.submittedAt || item.submittedDate || item.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          {isPending && (
+                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                          {(isPending || isProcessing) && (
                             <>
+                              {isPending && (
+                                <button
+                                  onClick={() => handleProcess(id)}
+                                  disabled={!!currentLoading}
+                                  className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
+                                  title="Mark as Processing (Picked for Verification)"
+                                >
+                                  <Loader size={13} />
+                                  <span>Process</span>
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleApprove(id)}
                                 disabled={!!currentLoading}
-                                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
+                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
                                 title="Approve & Send SMS with Phone Number"
                               >
-                                <CheckCircle size={14} />
-                                <span>Approve & SMS</span>
+                                <CheckCircle size={13} />
+                                <span>Approve</span>
                               </button>
                               <button
                                 onClick={() => handleReject(id)}
                                 disabled={!!currentLoading}
-                                className="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
+                                className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
                                 title="Reject & Send SMS with Phone Number"
                               >
-                                <XCircle size={14} />
-                                <span>Reject & SMS</span>
+                                <XCircle size={13} />
+                                <span>Reject</span>
                               </button>
                             </>
                           )}
 
-                          {!isPending && (
+                          {(isApproved || isRejected) && (
                             <button
                               onClick={() => handleResendSMS(id)}
                               disabled={!!currentLoading}
-                              className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
+                              className="px-2 py-1 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
                               title="Resend SMS Notification to Agent"
                             >
-                              <Send size={13} />
+                              <Send size={12} />
                               <span>Resend SMS</span>
                             </button>
                           )}
 
                           <button 
                             onClick={() => handleDelete(id)} 
-                            className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                            className="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
                             title="Delete Record"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={15} />
                           </button>
                         </div>
                       </td>
@@ -344,7 +427,7 @@ const AdminPending = () => {
         {pagination.pages > 1 && (
           <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <p className="text-sm text-slate-500">
-              Page {page} of {pagination.pages} ({pagination.total} total requests)
+              Page {page} of {pagination.pages} ({pagination.total} total requests — 20 per page)
             </p>
             <div className="flex gap-2">
               <button

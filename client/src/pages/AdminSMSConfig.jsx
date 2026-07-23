@@ -242,6 +242,65 @@ export default function AdminSMSConfig() {
             </div>
           </form>
 
+          {/* Site Logo Configuration Card */}
+          <div className="bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-xl rounded-2xl border border-slate-100 dark:border-slate-800 p-6 md:p-8 shadow-xl space-y-4">
+            <h2 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+              <Globe size={20} className="text-[#2563eb]" />
+              <span>Site Logo URL (Top Right Header)</span>
+            </h2>
+            <p className="text-xs text-slate-500">Paste your logo image URL to display your custom brand logo in the top right corner of the site header.</p>
+
+            <div className="space-y-3">
+              <label className="block text-xs font-bold text-slate-500">Logo Image URL</label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="https://example.com/logo.png"
+                  value={localStorage.getItem('site_logo_url') || ''}
+                  onChange={(e) => {
+                    const url = e.target.value;
+                    localStorage.setItem('site_logo_url', url);
+                    window.dispatchEvent(new Event('site_logo_updated'));
+                  }}
+                  className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-900 dark:text-white outline-none focus:border-[#2563eb]"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.success('Logo URL updated!');
+                    window.dispatchEvent(new Event('site_logo_updated'));
+                  }}
+                  className="px-4 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-xl"
+                >
+                  Save Logo
+                </button>
+              </div>
+
+              {localStorage.getItem('site_logo_url') && (
+                <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-3">
+                  <span className="text-xs font-semibold text-slate-500">Preview:</span>
+                  <img
+                    src={localStorage.getItem('site_logo_url')}
+                    alt="Logo Preview"
+                    className="h-8 max-w-[150px] object-contain rounded"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      localStorage.removeItem('site_logo_url');
+                      window.dispatchEvent(new Event('site_logo_updated'));
+                      toast.success('Logo removed');
+                    }}
+                    className="text-xs text-rose-500 hover:underline ml-auto font-semibold"
+                  >
+                    Remove Logo
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Test SMS Card */}
           <form onSubmit={handleSendTestSMS} className="bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-xl rounded-2xl border border-slate-100 dark:border-slate-800 p-6 md:p-8 shadow-xl space-y-4">
             <h2 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">

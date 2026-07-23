@@ -8,7 +8,16 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const { admin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('site_logo_url') || '');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleLogoUpdate = () => {
+      setLogoUrl(localStorage.getItem('site_logo_url') || '');
+    };
+    window.addEventListener('site_logo_updated', handleLogoUpdate);
+    return () => window.removeEventListener('site_logo_updated', handleLogoUpdate);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -100,6 +109,17 @@ export default function Navbar() {
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+            {/* Top Right Custom Brand Logo */}
+            {logoUrl && (
+              <div className="flex items-center pl-2 border-l border-slate-200 dark:border-slate-800">
+                <img 
+                  src={logoUrl} 
+                  alt="Custom Brand Logo" 
+                  className="h-9 w-auto max-w-[120px] sm:max-w-[150px] object-contain rounded-lg"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -29,10 +29,12 @@ const {
   getPendingNumbers,
   approvePendingNumber,
   rejectPendingNumber,
+  markProcessingPending,
   resendSMSNotification,
   deletePendingNumber,
   bulkApprovePending,
   bulkRejectPending,
+  bulkMarkProcessingPending,
   bulkUploadFile,
   rollbackBatch,
   getUploadBatches,
@@ -109,11 +111,12 @@ router.delete('/admin/verified/:id', protect, deleteVerifiedNumber);
 router.get('/admin/pending', protect, getPendingNumbers);
 router.put('/admin/pending/:id/approve', protect, approvePendingNumber);
 router.put('/admin/pending/:id/reject', protect, rejectPendingNumber);
+router.put('/admin/pending/:id/process', protect, markProcessingPending);
 router.post('/admin/pending/:id/resend-sms', protect, resendSMSNotification);
 router.delete('/admin/pending/:id', protect, deletePendingNumber);
 router.post('/admin/pending/bulk-approve', protect, bulkApprovePending);
-router.post('/api/admin/pending/bulk-reject', protect, bulkRejectPending);
 router.post('/admin/pending/bulk-reject', protect, bulkRejectPending);
+router.post('/admin/pending/bulk-process', protect, bulkMarkProcessingPending);
 
 // Uploads & Batch routes
 router.post('/admin/upload', protect, upload.single('file'), bulkUploadFile);

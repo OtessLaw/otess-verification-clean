@@ -676,6 +676,55 @@ const testSMSGateway = async (req, res) => {
   }
 };
 
+// @desc    Mark a pending submission as processing (picked by admin)
+// @route   PUT /api/admin/pending/:id/process
+const markProcessingPending = async (req, res) => {
+  try {
+    const pending = await PendingNumber.findById(req.params.id);
+    if (!pending) return res.status(404).json({ success: false, message: 'Submission not found' });
+
+    pending.status = 'processing';
+    pending.updatedAt = new Date();
+    await pending.save();
+
+    await ActivityLog.create({ admin: req.admin?.name || 'Admin', action: 'PROCESS_PENDING', description: `Marked ${pending.phoneNumber} (${pending.submissionId}) as processing` });
+
+    res.status(200).json({ success: true, message: `Status updated to Processing.`, data: pending });
+  } catch (err) {
+    console.error('markProcessingPending error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Bulk mark pending submissions as processing
+// @route   POST /api/admin/pending/bulk-process
+const bulkMarkProcessingPending = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || !ids.length) return res.status(400).json({ success: false, message: 'Array of IDs is required' });
+
+    let updatedCount = 0;
+    const now = new Date();
+
+    for (const id of ids) {
+      const pending = await PendingNumber.findById(id);
+      if (!pending) continue;
+
+      pending.status = 'processing';
+      pending.updatedAt = now;
+      await pending.save();
+      updatedCount++;
+    }
+
+    await ActivityLog.create({ admin: req.admin?.name || 'Admin', action: 'BULK_PROCESS', description: `Bulk marked ${updatedCount} numbers as processing` });
+
+    res.status(200).json({ success: true, message: `Successfully marked ${updatedCount} numbers as Processing.` });
+  } catch (err) {
+    console.error('bulkMarkProcessingPending error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getVerifiedNumbers,
@@ -684,10 +733,12 @@ module.exports = {
   getPendingNumbers,
   approvePendingNumber,
   rejectPendingNumber,
+  markProcessingPending,
   resendSMSNotification,
   deletePendingNumber,
   bulkApprovePending,
   bulkRejectPending,
+  bulkMarkProcessingPending,
   bulkUploadFile,
   rollbackBatch,
   getUploadBatches,
