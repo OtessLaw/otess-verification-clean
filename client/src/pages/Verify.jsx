@@ -190,16 +190,10 @@ export default function Verify() {
                 exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.25 }}
               >
-                <form onSubmit={handleVerifySingle} className="mb-6 space-y-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Enter Phone Number
-                    </label>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                      <Zap size={13} className="text-amber-500 animate-pulse" />
-                      <span>Auto-verify enabled</span>
-                    </div>
-                  </div>
+                <form onSubmit={handleVerifySingle} className="mb-6">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Enter Phone Number
+                  </label>
                   <div className="flex gap-4">
                     <div className="relative flex-1">
                       <input
@@ -233,9 +227,6 @@ export default function Verify() {
                       )}
                     </motion.button>
                   </div>
-                  <p className="text-[11px] text-slate-400 dark:text-slate-500 pt-1">
-                    ⚡ Auto-verifies automatically as soon as you type or paste a 10-digit number.
-                  </p>
                 </form>
 
                 {singleError && (

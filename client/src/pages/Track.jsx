@@ -66,14 +66,7 @@ export default function Track() {
         </p>
       </div>
 
-      <div className="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden p-6 md:p-8 mb-8 space-y-2">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Search Query</span>
-          <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-            <Zap size={12} className="animate-pulse" />
-            <span>Auto-tracks on 10 digits or Submission ID</span>
-          </span>
-        </div>
+      <div className="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden p-6 md:p-8 mb-8">
         <form onSubmit={handleTrack} className="flex gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
