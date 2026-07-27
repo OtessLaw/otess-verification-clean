@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Zap, Loader2 } from 'lucide-react';
+import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Search, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Verify() {
@@ -21,6 +21,19 @@ export default function Verify() {
   const [bulkResult, setBulkResult] = useState(null);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkError, setBulkError] = useState(null);
+
+  // Helper to format phone display e.g. 053 435 9912
+  const formatPhoneDisplay = (phone) => {
+    if (!phone) return '';
+    const clean = phone.replace(/\D/g, '');
+    if (clean.length === 10) {
+      return `${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6)}`;
+    }
+    if (clean.length === 12 && clean.startsWith('233')) {
+      return `+${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6, 9)} ${clean.slice(9)}`;
+    }
+    return phone;
+  };
 
   // Helper to test if input forms a complete phone number format
   const isCompletePhone = (phoneStr) => {
@@ -147,14 +160,47 @@ export default function Verify() {
     document.body.removeChild(a);
   };
 
+  const downloadReceipt = () => {
+    if (!singleResult) return;
+    const phone = singleResult.data?.phoneNumber || singlePhone;
+    const formatted = formatPhoneDisplay(phone);
+    const date = new Date(singleResult.data?.verifiedDate || Date.now()).toLocaleString();
+    const batchId = singleResult.data?.batchId || 'VERIFIED-OTESS';
+
+    const receiptContent = `====================================
+OTESS PHONE NUMBER VERIFICATION RECEIPT
+====================================
+Status: VERIFIED (GREEN)
+Phone Number: ${phone}
+Formatted Number: ${formatted}
+Verification Date: ${date}
+Batch Reference: ${batchId}
+System: OTESS Instant Verification
+Validation: PASS - Cleared for Data Bundle Order
+====================================
+Website: https://getmyzta.shop/
+Thank you for using OTESS System!
+`;
+
+    const blob = new Blob([receiptContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `OTESS_Verification_Receipt_${phone}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.success('Receipt downloaded successfully!');
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="max-w-4xl mx-auto p-6"
+      className="max-w-4xl mx-auto p-4 sm:p-6"
     >
-      <div className="text-center mb-10">
+      <div className="text-center mb-8 sm:mb-10">
         <h1 className="text-3xl font-bold mb-3 font-outfit text-slate-900 dark:text-white">
           <ShieldCheck className="inline-block mr-2 text-[#2563eb]" size={36} />
           OTESS Phone Number Verification
@@ -164,7 +210,7 @@ export default function Verify() {
         </p>
       </div>
 
-      <div className="bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-xl rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
+      <div className="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-xl rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
         <div className="flex border-b border-slate-100 dark:border-slate-800">
           <button
             onClick={() => setTab('single')}
@@ -189,54 +235,67 @@ export default function Verify() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.25 }}
+                className="max-w-md mx-auto space-y-6"
               >
-                <form onSubmit={handleVerifySingle} className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Enter Phone Number
-                  </label>
-                  <div className="flex gap-4">
-                    <div className="relative flex-1">
-                      <input
-                        type="text"
-                        value={singlePhone}
-                        onChange={(e) => setSinglePhone(e.target.value)}
-                        placeholder="e.g. 0241234567"
-                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-slate-900 dark:text-white"
-                        required
-                      />
-                      {singleLoading && (
-                        <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#2563eb]">
-                          <Loader2 className="w-5 h-5 animate-spin" />
+                {/* Form matching mockup */}
+                <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-5">
+                  <form onSubmit={handleVerifySingle} className="space-y-4">
+                    <div>
+                      <label className="block text-base font-semibold text-slate-800 dark:text-slate-200 mb-2.5">
+                        Mobile number
+                      </label>
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                          <Search size={20} />
                         </div>
-                      )}
+                        <input
+                          type="text"
+                          value={singlePhone}
+                          onChange={(e) => setSinglePhone(e.target.value)}
+                          placeholder="e.g. 0241234567 or +233..."
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl pl-12 pr-10 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-lg font-medium text-slate-900 dark:text-white transition-all shadow-sm"
+                          required
+                        />
+                        {singleLoading && (
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#2563eb]">
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          </div>
+                        )}
+                      </div>
                     </div>
+
                     <motion.button
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       type="submit"
                       disabled={singleLoading}
-                      className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl px-8 py-3 font-medium shadow-md shadow-[#2563eb]/20 transition-colors disabled:opacity-50 flex items-center gap-2"
+                      className="w-full bg-[#2565ed] hover:bg-[#1d4ed8] text-white rounded-full py-3.5 text-base font-semibold shadow-lg shadow-[#2565ed]/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {singleLoading ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-5 h-5 animate-spin" />
                           <span>Verifying...</span>
                         </>
                       ) : (
-                        <span>Verify</span>
+                        <>
+                          <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                            <Check size={13} strokeWidth={3} className="text-white" />
+                          </div>
+                          <span>Verify Number</span>
+                        </>
                       )}
                     </motion.button>
-                  </div>
-                </form>
+                  </form>
+                </div>
 
                 {singleError && (
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-4 mb-6 rounded-xl bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/20 dark:border-red-900/30 flex items-center"
+                    className="p-4 rounded-2xl bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/20 dark:border-red-900/30 flex items-center text-sm"
                   >
-                    <AlertCircle className="w-5 h-5 mr-2" />
-                    {singleError}
+                    <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                    <span>{singleError}</span>
                   </motion.div>
                 )}
 
@@ -247,62 +306,96 @@ export default function Verify() {
                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     className="space-y-4"
                   >
+                    {/* VERIFIED STATE - Matches Screenshot Exactly */}
                     {singleResult.status === 'verified' && (
-                      <div className="p-5 bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-400 rounded-2xl space-y-3">
-                        <div className="flex items-center space-x-2 text-green-600 dark:text-green-400">
-                          <Check className="w-6 h-6 flex-shrink-0 text-green-500" />
-                          <span className="font-outfit font-extrabold text-lg">🟢 VERIFIED</span>
+                      <div className="space-y-4">
+                        <div className="bg-[#e8f8ec] dark:bg-emerald-950/30 border border-emerald-400/60 dark:border-emerald-800/50 rounded-3xl p-8 text-center space-y-3 shadow-sm">
+                          {/* Multi-ring Centered Check Badge */}
+                          <div className="w-20 h-20 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
+                            <div className="w-14 h-14 rounded-full bg-[#16a34a] flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                              <Check size={32} strokeWidth={3.5} className="text-white" />
+                            </div>
+                          </div>
+
+                          <h2 className="text-2xl font-bold text-slate-900 dark:text-white font-outfit">
+                            Number verified
+                          </h2>
+
+                          <p className="text-base text-slate-600 dark:text-slate-300 font-medium">
+                            Go ahead and place your order.
+                          </p>
+
+                          <p className="text-base font-mono font-bold text-slate-500 dark:text-slate-400 tracking-widest pt-1">
+                            {formatPhoneDisplay(singleResult.data?.phoneNumber || singlePhone)}
+                          </p>
                         </div>
-                        <p className="text-sm font-semibold text-green-800 dark:text-green-300">Your number has been successfully verified.</p>
-                        <p className="text-xs text-green-700 dark:text-green-400 font-medium">You are all set! You can now place your order with confidence.</p>
-                        <div className="text-[11px] text-green-600 dark:text-green-500 pt-2 border-t border-green-500/20 flex justify-between">
-                          <span>Verification Date: {new Date(singleResult.data?.verifiedDate || Date.now()).toLocaleDateString()}</span>
-                          <span>Batch ID: {singleResult.data?.batchId || 'MANUAL-ENTRY'}</span>
-                        </div>
+
+                        {/* Download Receipt Button */}
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={downloadReceipt}
+                          className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white rounded-full py-4 text-base font-semibold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2"
+                        >
+                          <Download size={20} />
+                          <span>Download Receipt</span>
+                        </motion.button>
                       </div>
                     )}
 
+                    {/* PENDING STATE - Styled like Top Badge in Screenshot */}
                     {singleResult.status === 'pending' && (
-                      <div className="p-5 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded-2xl space-y-3">
-                        <div className="flex items-center space-x-2 text-amber-600 dark:text-amber-400">
-                          <Clock className="w-6 h-6 flex-shrink-0 text-amber-500" />
-                          <span className="font-outfit font-extrabold text-lg">🟡 Verification in Progress</span>
+                      <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-400/60 dark:border-amber-800/50 rounded-3xl p-8 text-center space-y-4 shadow-sm">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-100 dark:bg-amber-900/40 rounded-full text-xs font-bold text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
+                          <span>WAITING FOR APPROVAL</span>
                         </div>
-                        <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Your number has already been submitted for verification.</p>
-                        <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">Verification is typically completed within 72 hours.</p>
-                        <div className="text-[11px] text-amber-600 dark:text-amber-500 pt-2 border-t border-amber-500/20 flex justify-between">
-                          <span>Submission ID: {singleResult.data?.submissionId}</span>
-                          <span>Queue Position: #{singleResult.data?.position || 1}</span>
+                        <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto">
+                          <Clock size={32} className="text-amber-600 dark:text-amber-400" />
                         </div>
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white font-outfit">
+                          Verification in Progress
+                        </h2>
+                        <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                          Your number has already been submitted for verification. Completed within 72 hours.
+                        </p>
+                        <p className="text-xs font-mono text-slate-500 dark:text-slate-400 tracking-wider pt-2 border-t border-amber-200/60 dark:border-amber-800/50">
+                          {formatPhoneDisplay(singleResult.data?.phoneNumber || singlePhone)}
+                        </p>
                       </div>
                     )}
 
+                    {/* NOT VERIFIED / NOT FOUND STATE */}
                     {(singleResult.status === 'not_found' || singleResult.status === 'invalid') && (
-                      <div className="p-5 bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 rounded-2xl space-y-4">
-                        <div className="flex items-center space-x-2 text-red-600 dark:text-red-400">
-                          <X className="w-6 h-6 flex-shrink-0 text-red-500" />
-                          <span className="font-outfit font-extrabold text-lg">🔴 NOT VERIFIED</span>
+                      <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-400/60 dark:border-rose-800/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm text-center">
+                        <div className="w-16 h-16 rounded-full bg-rose-500/20 flex items-center justify-center mx-auto">
+                          <X size={32} className="text-rose-600 dark:text-rose-400" />
                         </div>
-                        <p className="text-sm font-semibold text-red-800 dark:text-red-300">Your number has not been verified yet.</p>
-                        
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white font-outfit">
+                          Number not verified
+                        </h2>
+                        <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                          Your number has not been verified yet in OTESS database.
+                        </p>
+
                         {submitSuccess ? (
                           <motion.div 
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="p-4 bg-green-500/15 border border-green-500/40 text-green-700 dark:text-green-400 rounded-xl text-xs space-y-2"
+                            className="p-4 bg-green-500/15 border border-green-500/40 text-green-700 dark:text-green-400 rounded-2xl text-xs space-y-2 text-left"
                           >
                             <h4 className="font-bold text-sm flex items-center gap-1.5 text-green-600 dark:text-green-400">
                               <Check size={18} /> 🎉 Submission Successful!
                             </h4>
                             <p className="text-xs">Your verification request has been received successfully.</p>
                             <p className="text-xs">Our team will review and add your number to our verified database within 72 hours.</p>
-                            <p className="text-xs">Please return on <strong className="underline">{submitSuccess.expectedDate}</strong> to check your verification status. Once your number is verified, you'll be able to place your order without any issues.</p>
+                            <p className="text-xs">Please return on <strong className="underline">{submitSuccess.expectedDate}</strong> to check your verification status.</p>
                             <p className="text-xs font-semibold pt-1 border-t border-green-500/20">
                               Submission ID: <span className="font-mono bg-green-500/20 px-2 py-0.5 rounded text-green-800 dark:text-green-300">{submitSuccess.submissionId}</span>
                             </p>
                           </motion.div>
                         ) : (
-                          <form onSubmit={handleSubmitNotVerified} className="space-y-3 pt-2 border-t border-red-500/20">
+                          <form onSubmit={handleSubmitNotVerified} className="space-y-3 pt-2 border-t border-rose-500/20 text-left">
                             <div>
                               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                                 <UserCheck size={14} className="text-emerald-500" />
@@ -313,16 +406,16 @@ export default function Verify() {
                                 value={agentPhoneInput}
                                 onChange={(e) => setAgentPhoneInput(e.target.value)}
                                 placeholder="Enter Agent Phone Number e.g. 0559876543"
-                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white"
                                 required
                               />
                             </div>
                             <motion.button
-                              whileHover={{ scale: 1.03 }}
-                              whileTap={{ scale: 0.97 }}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               type="submit"
                               disabled={submittingNow}
-                              className="px-6 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-xl flex items-center space-x-2 transition-all shadow-md shadow-[#2563eb]/20 animate-heartbeat disabled:opacity-50"
+                              className="w-full py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-full flex items-center justify-center space-x-2 transition-all shadow-md disabled:opacity-50"
                             >
                               <Upload className="w-4 h-4" />
                               <span>{submittingNow ? 'Submitting...' : 'Submit Number Now'}</span>
