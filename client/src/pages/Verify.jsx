@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck } from 'lucide-react';
+import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Zap, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Verify() {
@@ -13,20 +13,37 @@ export default function Verify() {
   const [agentPhoneInput, setAgentPhoneInput] = useState('');
   const [submittingNow, setSubmittingNow] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(null);
+  const [autoVerifyEnabled, setAutoVerifyEnabled] = useState(true);
+
+  const lastVerifiedPhoneRef = useRef('');
 
   const [bulkPhones, setBulkPhones] = useState('');
   const [bulkResult, setBulkResult] = useState(null);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkError, setBulkError] = useState(null);
 
-  const handleVerifySingle = async (e) => {
-    e.preventDefault();
+  // Helper to test if input forms a complete phone number format
+  const isCompletePhone = (phoneStr) => {
+    if (!phoneStr) return false;
+    const digits = phoneStr.replace(/\D/g, '');
+    if (digits.length === 10 && digits.startsWith('0')) return true;
+    if (digits.length === 9 && (digits.startsWith('2') || digits.startsWith('5'))) return true;
+    if (digits.length === 12 && digits.startsWith('233')) return true;
+    return false;
+  };
+
+  const executeVerifySingle = async (phoneToVerify) => {
+    const target = (phoneToVerify || singlePhone).trim();
+    if (!target) return;
+
     setSingleLoading(true);
     setSingleResult(null);
     setSingleError(null);
     setSubmitSuccess(null);
+    lastVerifiedPhoneRef.current = target;
+
     try {
-      const res = await axios.post('/api/verify/single', { phoneNumber: singlePhone });
+      const res = await axios.post('/api/verify/single', { phoneNumber: target });
       setSingleResult(res.data);
     } catch (err) {
       setSingleError(err.response?.data?.message || 'Verification failed');
@@ -34,6 +51,35 @@ export default function Verify() {
       setSingleLoading(false);
     }
   };
+
+  const handleVerifySingle = (e) => {
+    if (e) e.preventDefault();
+    executeVerifySingle(singlePhone);
+  };
+
+  // Auto-trigger verification as soon as customer enters a complete phone number
+  useEffect(() => {
+    const trimmed = singlePhone.trim();
+
+    if (!trimmed) {
+      setSingleResult(null);
+      setSingleError(null);
+      lastVerifiedPhoneRef.current = '';
+      return;
+    }
+
+    if (lastVerifiedPhoneRef.current && trimmed !== lastVerifiedPhoneRef.current) {
+      setSingleResult(null);
+      setSingleError(null);
+    }
+
+    if (autoVerifyEnabled && isCompletePhone(trimmed) && trimmed !== lastVerifiedPhoneRef.current && !singleLoading) {
+      const timer = setTimeout(() => {
+        executeVerifySingle(trimmed);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [singlePhone, autoVerifyEnabled]);
 
   const handleSubmitNotVerified = async (e) => {
     e.preventDefault();
@@ -144,29 +190,52 @@ export default function Verify() {
                 exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.25 }}
               >
-                <form onSubmit={handleVerifySingle} className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Enter Phone Number
-                  </label>
+                <form onSubmit={handleVerifySingle} className="mb-6 space-y-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Enter Phone Number
+                    </label>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                      <Zap size={13} className="text-amber-500 animate-pulse" />
+                      <span>Auto-verify enabled</span>
+                    </div>
+                  </div>
                   <div className="flex gap-4">
-                    <input
-                      type="text"
-                      value={singlePhone}
-                      onChange={(e) => setSinglePhone(e.target.value)}
-                      placeholder="e.g. 0241234567"
-                      className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-slate-900 dark:text-white"
-                      required
-                    />
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={singlePhone}
+                        onChange={(e) => setSinglePhone(e.target.value)}
+                        placeholder="e.g. 0241234567"
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-slate-900 dark:text-white"
+                        required
+                      />
+                      {singleLoading && (
+                        <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#2563eb]">
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        </div>
+                      )}
+                    </div>
                     <motion.button
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                       type="submit"
                       disabled={singleLoading}
-                      className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl px-8 py-3 font-medium shadow-md shadow-[#2563eb]/20 transition-colors disabled:opacity-50"
+                      className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl px-8 py-3 font-medium shadow-md shadow-[#2563eb]/20 transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
-                      {singleLoading ? 'Verifying...' : 'Verify'}
+                      {singleLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Verifying...</span>
+                        </>
+                      ) : (
+                        <span>Verify</span>
+                      )}
                     </motion.button>
                   </div>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 pt-1">
+                    ⚡ Auto-verifies automatically as soon as you type or paste a 10-digit number.
+                  </p>
                 </form>
 
                 {singleError && (

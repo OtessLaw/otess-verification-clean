@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Navigation, Search, Check, AlertCircle, Clock } from 'lucide-react';
+import { Navigation, Search, Check, AlertCircle, Clock, Zap, Loader2 } from 'lucide-react';
 
 export default function Track() {
   const [query, setQuery] = useState('');
@@ -8,14 +8,17 @@ export default function Track() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
-  const handleTrack = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const lastTrackedQueryRef = useRef('');
+
+  const executeTrack = async (searchQuery) => {
+    const target = (searchQuery || query).trim();
+    if (!target) return;
     setLoading(true);
     setResult(null);
     setError(null);
+    lastTrackedQueryRef.current = target;
     try {
-      const res = await axios.get(`/api/track/${encodeURIComponent(query)}`);
+      const res = await axios.get(`/api/track/${encodeURIComponent(target)}`);
       setResult(res.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Tracking information not found');
@@ -23,6 +26,33 @@ export default function Track() {
       setLoading(false);
     }
   };
+
+  const handleTrack = (e) => {
+    if (e) e.preventDefault();
+    executeTrack(query);
+  };
+
+  // Auto track when user enters a 10-digit phone number or complete submission ID (SUB-xxxxx)
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setResult(null);
+      setError(null);
+      lastTrackedQueryRef.current = '';
+      return;
+    }
+
+    const digits = trimmed.replace(/\D/g, '');
+    const isFullPhone = (digits.length === 10 && digits.startsWith('0')) || digits.length === 12;
+    const isSubmissionId = /^SUB-\d{4,6}$/i.test(trimmed);
+
+    if ((isFullPhone || isSubmissionId) && trimmed !== lastTrackedQueryRef.current && !loading) {
+      const timer = setTimeout(() => {
+        executeTrack(trimmed);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [query]);
 
   return (
     <div className="max-w-4xl mx-auto p-6 animate-fade-in">
@@ -36,7 +66,14 @@ export default function Track() {
         </p>
       </div>
 
-      <div className="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden p-6 md:p-8 mb-8">
+      <div className="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden p-6 md:p-8 mb-8 space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Search Query</span>
+          <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+            <Zap size={12} className="animate-pulse" />
+            <span>Auto-tracks on 10 digits or Submission ID</span>
+          </span>
+        </div>
         <form onSubmit={handleTrack} className="flex gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
@@ -45,16 +82,28 @@ export default function Track() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Phone Number or SUB-12345"
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-slate-900 dark:text-white"
+              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-12 pr-10 py-3 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-slate-900 dark:text-white"
               required
             />
+            {loading && (
+              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#2563eb]">
+                <Loader2 className="w-5 h-5 animate-spin" />
+              </div>
+            )}
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl px-8 py-3 font-medium shadow-md shadow-[#2563eb]/20 transition-colors disabled:opacity-50 whitespace-nowrap"
+            className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl px-8 py-3 font-medium shadow-md shadow-[#2563eb]/20 transition-colors disabled:opacity-50 whitespace-nowrap flex items-center gap-2"
           >
-            {loading ? 'Searching...' : 'Track'}
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Searching...</span>
+              </>
+            ) : (
+              <span>Track</span>
+            )}
           </button>
         </form>
       </div>
