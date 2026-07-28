@@ -292,4 +292,29 @@ const trackSubmission = async (req, res) => {
   }
 };
 
-module.exports = { verifySingleNumber, verifyBulkNumbers, submitSingleNumber, submitBulkNumbers, trackSubmission };
+// @desc    Get latest verified date from database (Public)
+// @route   GET /api/system/latest-date
+const getLatestVerifiedDate = async (req, res) => {
+  try {
+    const UploadBatch = require('../models/UploadBatch');
+    const latestVerified = await VerifiedNumber.findOne().sort({ uploadDate: -1, verifiedDate: -1, createdAt: -1 });
+    const latestBatch = await UploadBatch.findOne().sort({ createdAt: -1, date: -1 });
+
+    let latestDate = new Date();
+    if (latestVerified?.uploadDate) {
+      latestDate = new Date(latestVerified.uploadDate);
+    } else if (latestVerified?.verifiedDate) {
+      latestDate = new Date(latestVerified.verifiedDate);
+    } else if (latestBatch?.createdAt) {
+      latestDate = new Date(latestBatch.createdAt);
+    }
+
+    const formatted = latestDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    res.status(200).json({ success: true, latestDate: formatted, timestamp: latestDate });
+  } catch (err) {
+    const fallback = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    res.status(200).json({ success: true, latestDate: fallback });
+  }
+};
+
+module.exports = { verifySingleNumber, verifyBulkNumbers, submitSingleNumber, submitBulkNumbers, trackSubmission, getLatestVerifiedDate };

@@ -16,16 +16,26 @@ export default function Verify() {
   const [autoVerifyEnabled, setAutoVerifyEnabled] = useState(true);
   const [showQRProof, setShowQRProof] = useState(false);
 
-  const todayFormatted = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const [dbLatestDate, setDbLatestDate] = useState(() => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }));
+
+  useEffect(() => {
+    axios.get('/api/system/latest-date')
+      .then(res => {
+        if (res.data?.latestDate) {
+          setDbLatestDate(res.data.latestDate);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const formatVerifiedDate = (dateStr) => {
-    if (!dateStr) return todayFormatted;
+    if (!dateStr) return dbLatestDate;
     try {
       const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return todayFormatted;
+      if (isNaN(d.getTime())) return dbLatestDate;
       return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     } catch {
-      return todayFormatted;
+      return dbLatestDate;
     }
   };
 
@@ -310,7 +320,7 @@ Thank you for using OTESS System!
           <div className="flex items-center justify-center gap-2 text-slate-900 dark:text-white">
             <Calendar size={20} className="text-[#2563eb]" />
             <span className="text-xl font-extrabold font-outfit tracking-tight">
-              {todayFormatted}
+              {dbLatestDate}
             </span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
@@ -356,7 +366,7 @@ Thank you for using OTESS System!
                     </span>
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>Updated: {todayFormatted}</span>
+                      <span>Updated: {dbLatestDate}</span>
                     </span>
                   </div>
 

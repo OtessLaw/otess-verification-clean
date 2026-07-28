@@ -18,7 +18,8 @@ const {
   verifyBulkNumbers,
   submitSingleNumber,
   submitBulkNumbers,
-  trackSubmission
+  trackSubmission,
+  getLatestVerifiedDate
 } = require('../controllers/verificationController');
 
 const {
@@ -88,6 +89,7 @@ router.post('/verify/bulk', verifyBulkNumbers);
 router.post('/submit/single', submitSingleNumber);
 router.post('/submit/bulk', submitBulkNumbers);
 router.get('/track/:query', trackSubmission);
+router.get('/system/latest-date', getLatestVerifiedDate);
 
 // ==========================================
 // AUTH ROUTES (ADMIN ONLY)
