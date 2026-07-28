@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Search, Loader2, ExternalLink, Radio, QrCode, Sparkles, History } from 'lucide-react';
+import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Search, Loader2, ExternalLink, Radio, QrCode, Sparkles, History, Bell } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Verify() {
@@ -44,7 +44,6 @@ export default function Verify() {
     });
   };
 
-  // Helper to format phone display e.g. 053 435 9912
   const formatPhoneDisplay = (phone) => {
     if (!phone) return '';
     const clean = phone.replace(/\D/g, '');
@@ -57,7 +56,6 @@ export default function Verify() {
     return phone;
   };
 
-  // Helper to detect telecom carrier in Ghana
   const detectCarrier = (phone) => {
     if (!phone) return null;
     let local = phone.replace(/\D/g, '');
@@ -70,7 +68,6 @@ export default function Verify() {
     return null;
   };
 
-  // Helper to test if input forms a complete phone number format
   const isCompletePhone = (phoneStr) => {
     if (!phoneStr) return false;
     const digits = phoneStr.replace(/\D/g, '');
@@ -107,7 +104,6 @@ export default function Verify() {
     executeVerifySingle(singlePhone);
   };
 
-  // Auto-trigger verification as soon as customer enters a complete phone number
   useEffect(() => {
     const trimmed = singlePhone.trim();
 
@@ -131,12 +127,20 @@ export default function Verify() {
     }
   }, [singlePhone, autoVerifyEnabled]);
 
+  useEffect(() => {
+    if ((singleResult?.status === 'not_found' || singleResult?.status === 'invalid') && !agentPhoneInput) {
+      if (isCompletePhone(singlePhone)) {
+        setAgentPhoneInput(singlePhone);
+      }
+    }
+  }, [singleResult, singlePhone]);
+
   const handleSubmitNotVerified = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     const phoneToSubmit = singlePhone || singleResult?.data?.phoneNumber;
     if (!phoneToSubmit) return;
     if (!agentPhoneInput) {
-      toast.error('Please enter your Agent Phone Number for SMS notifications.');
+      toast.error('Please enter your phone number to receive SMS notifications.');
       return;
     }
     setSubmittingNow(true);
@@ -151,7 +155,7 @@ export default function Verify() {
         submissionId: res.data?.data?.submissionId || 'SUBMITTED',
         expectedDate
       });
-      toast.success(`Submission received! SMS notification queued for agent.`);
+      toast.success(`Request submitted! SMS alert registered for ${agentPhoneInput}`);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Submission failed');
     } finally {
@@ -283,10 +287,8 @@ Thank you for using OTESS System!
                 transition={{ duration: 0.25 }}
                 className="max-w-md mx-auto space-y-6"
               >
-                {/* Form matching mockup */}
                 <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-5 relative overflow-hidden">
                   
-                  {/* Distinct Status Pill Header */}
                   <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800/80">
                     <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                       <Sparkles size={13} className="text-[#2563eb]" />
@@ -330,7 +332,6 @@ Thank you for using OTESS System!
                         )}
                       </div>
 
-                      {/* Recent Search Chips Feature */}
                       {recentSearches.length > 0 && !singlePhone && (
                         <div className="flex items-center gap-1.5 pt-2 overflow-x-auto text-[11px]">
                           <span className="text-slate-400 flex items-center gap-1 shrink-0">
@@ -395,12 +396,9 @@ Thank you for using OTESS System!
                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     className="space-y-4"
                   >
-                    {/* VERIFIED STATE - Matches Screenshot Exactly + Extra Features */}
                     {singleResult.status === 'verified' && (
                       <div className="space-y-4">
                         <div className="bg-[#e8f8ec] dark:bg-emerald-950/30 border border-emerald-400/60 dark:border-emerald-800/50 rounded-3xl p-8 text-center space-y-3 shadow-sm relative overflow-hidden">
-                          
-                          {/* Distinct Official Security Stamp */}
                           <div className="absolute top-4 right-4">
                             <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300">
                               <ShieldCheck size={12} className="text-emerald-600" />
@@ -408,7 +406,6 @@ Thank you for using OTESS System!
                             </span>
                           </div>
 
-                          {/* Multi-ring Centered Check Badge */}
                           <div className="w-20 h-20 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
                             <div className="w-14 h-14 rounded-full bg-[#16a34a] flex items-center justify-center shadow-lg shadow-emerald-500/30">
                               <Check size={32} strokeWidth={3.5} className="text-white" />
@@ -434,7 +431,6 @@ Thank you for using OTESS System!
                             )}
                           </div>
 
-                          {/* Expandable Digital QR Proof Toggle */}
                           {showQRProof && (
                             <motion.div 
                               initial={{ opacity: 0, height: 0 }}
@@ -449,7 +445,6 @@ Thank you for using OTESS System!
                           )}
                         </div>
 
-                        {/* Download Receipt Button */}
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
@@ -460,7 +455,6 @@ Thank you for using OTESS System!
                           <span>Download Receipt</span>
                         </motion.button>
 
-                        {/* Distinct Action Bar */}
                         <div className="grid grid-cols-3 gap-2 pt-1">
                           <button
                             onClick={copyProofText}
@@ -491,7 +485,6 @@ Thank you for using OTESS System!
                       </div>
                     )}
 
-                    {/* PENDING STATE - Styled like Top Badge in Screenshot */}
                     {singleResult.status === 'pending' && (
                       <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-400/60 dark:border-amber-800/50 rounded-3xl p-8 text-center space-y-4 shadow-sm">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-100 dark:bg-amber-900/40 rounded-full text-xs font-bold text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
@@ -513,62 +506,87 @@ Thank you for using OTESS System!
                       </div>
                     )}
 
-                    {/* NOT VERIFIED / NOT FOUND STATE */}
                     {(singleResult.status === 'not_found' || singleResult.status === 'invalid') && (
-                      <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-400/60 dark:border-rose-800/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm text-center">
+                      <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-400/60 dark:border-rose-800/50 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm text-center">
                         <div className="w-16 h-16 rounded-full bg-rose-500/20 flex items-center justify-center mx-auto">
                           <X size={32} className="text-rose-600 dark:text-rose-400" />
                         </div>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white font-outfit">
-                          Number not verified
-                        </h2>
-                        <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
-                          Your number has not been verified yet in OTESS database.
-                        </p>
+                        
+                        <div>
+                          <h2 className="text-xl font-bold text-slate-900 dark:text-white font-outfit mb-1">
+                            Number Not Verified
+                          </h2>
+                          <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                            <span className="font-mono font-bold text-rose-600 dark:text-rose-400">{formatPhoneDisplay(singlePhone)}</span> is not in the OTESS database yet.
+                          </p>
+                        </div>
 
                         {submitSuccess ? (
                           <motion.div 
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="p-4 bg-green-500/15 border border-green-500/40 text-green-700 dark:text-green-400 rounded-2xl text-xs space-y-2 text-left"
+                            className="p-5 bg-emerald-500/15 border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 rounded-3xl text-xs space-y-2.5 text-left"
                           >
-                            <h4 className="font-bold text-sm flex items-center gap-1.5 text-green-600 dark:text-green-400">
-                              <Check size={18} /> 🎉 Submission Successful!
+                            <h4 className="font-bold text-sm flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
+                              <Check size={18} className="text-emerald-500" /> 🎉 Submission Queued & SMS Alert Active!
                             </h4>
-                            <p className="text-xs">Your verification request has been received successfully.</p>
-                            <p className="text-xs">Our team will review and add your number to our verified database within 72 hours.</p>
-                            <p className="text-xs">Please return on <strong className="underline">{submitSuccess.expectedDate}</strong> to check your verification status.</p>
-                            <p className="text-xs font-semibold pt-1 border-t border-green-500/20">
-                              Submission ID: <span className="font-mono bg-green-500/20 px-2 py-0.5 rounded text-green-800 dark:text-green-300">{submitSuccess.submissionId}</span>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                              Your number has been submitted to OTESS admins for approval.
                             </p>
+                            <p className="text-xs text-slate-600 dark:text-slate-300">
+                              You will receive an instant SMS notification at <strong className="font-mono bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-900 dark:text-emerald-200">{agentPhoneInput}</strong> as soon as your number is verified.
+                            </p>
+                            <div className="text-[11px] font-semibold pt-2 border-t border-emerald-500/20 flex justify-between items-center">
+                              <span>Submission ID: <span className="font-mono text-emerald-700 dark:text-emerald-400">{submitSuccess.submissionId}</span></span>
+                              <span className="text-emerald-600 dark:text-emerald-400">Est: ~72 hrs</span>
+                            </div>
                           </motion.div>
                         ) : (
-                          <form onSubmit={handleSubmitNotVerified} className="space-y-3 pt-2 border-t border-rose-500/20 text-left">
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
-                                <UserCheck size={14} className="text-emerald-500" />
-                                <span>Agent Phone Number (For SMS Alerts)</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={agentPhoneInput}
-                                onChange={(e) => setAgentPhoneInput(e.target.value)}
-                                placeholder="Enter Agent Phone Number e.g. 0559876543"
-                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white"
-                                required
-                              />
+                          <div className="bg-white/90 dark:bg-slate-900/90 rounded-2xl p-5 border border-rose-200/80 dark:border-rose-900/40 text-left space-y-3.5 shadow-sm">
+                            <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                              <Bell size={16} className="text-[#2563eb] animate-bounce" />
+                              <span>Get SMS Alert When Verified</span>
                             </div>
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              type="submit"
-                              disabled={submittingNow}
-                              className="w-full py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-full flex items-center justify-center space-x-2 transition-all shadow-md disabled:opacity-50"
-                            >
-                              <Upload className="w-4 h-4" />
-                              <span>{submittingNow ? 'Submitting...' : 'Submit Number Now'}</span>
-                            </motion.button>
-                          </form>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                              Submit this number for admin approval and receive an SMS notification automatically once approved.
+                            </p>
+                            
+                            <form onSubmit={handleSubmitNotVerified} className="space-y-3 pt-1">
+                              <div>
+                                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                  Your Notification Phone Number
+                                </label>
+                                <input
+                                  type="text"
+                                  value={agentPhoneInput}
+                                  onChange={(e) => setAgentPhoneInput(e.target.value)}
+                                  placeholder="Enter Phone Number for SMS Alert"
+                                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-3 text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-[#2563eb] focus:outline-none"
+                                  required
+                                />
+                              </div>
+
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                type="submit"
+                                disabled={submittingNow}
+                                className="w-full py-3.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-bold rounded-full flex items-center justify-center space-x-2 transition-all shadow-md shadow-[#2563eb]/20 disabled:opacity-50"
+                              >
+                                {submittingNow ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    <span>Submitting Request...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Bell className="w-4 h-4" />
+                                    <span>Submit & Alert Me When Verified</span>
+                                  </>
+                                )}
+                              </motion.button>
+                            </form>
+                          </div>
                         )}
                       </div>
                     )}
