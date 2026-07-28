@@ -85,7 +85,7 @@ const getVerifiedNumbers = async (req, res) => {
 // @desc    Manually add a verified number
 const manuallyAddVerifiedNumber = async (req, res) => {
   try {
-    const { phoneNumber } = req.body;
+    const { phoneNumber, verifiedDate } = req.body;
     if (!phoneNumber) return res.status(400).json({ success: false, message: 'Phone number is required' });
 
     const { isValid, normalized } = normalizePhoneNumber(phoneNumber);
@@ -94,7 +94,8 @@ const manuallyAddVerifiedNumber = async (req, res) => {
     const exists = await VerifiedNumber.findOne({ phoneNumber: normalized });
     if (exists) return res.status(400).json({ success: false, message: 'Number is already verified' });
 
-    const newVerified = await VerifiedNumber.create({ phoneNumber: normalized, batchId: 'MANUAL-ENTRY', uploadedBy: req.admin.email, status: 'verified', uploadDate: new Date(), verifiedDate: new Date() });
+    const customDate = verifiedDate ? new Date(verifiedDate) : new Date();
+    const newVerified = await VerifiedNumber.create({ phoneNumber: normalized, batchId: 'MANUAL-ENTRY', uploadedBy: req.admin.email, status: 'verified', uploadDate: new Date(), verifiedDate: customDate });
 
     // Auto-approve any pending submission for this number and trigger SMS if agent is associated
     const pendingList = await PendingNumber.find({ phoneNumber: normalized, status: 'pending' });
