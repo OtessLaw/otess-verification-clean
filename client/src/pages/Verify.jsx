@@ -301,11 +301,11 @@ Thank you for using OTESS System!
           Verify phone numbers instantly for bulk data bundle orders.
         </p>
 
-        {/* Live Ledger Date Tracker Pill */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-semibold shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          <Calendar size={13} className="text-[#2563eb]" />
-          <span>Live Ledger Date: <strong>{todayFormatted}</strong></span>
+        {/* Live Database Date Tracker Pill - Prominent & Bigger */}
+        <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm font-bold shadow-sm">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+          <Calendar size={16} className="text-[#2563eb]" />
+          <span>Live Database: <strong className="font-mono text-[#2563eb] dark:text-blue-400">{todayFormatted}</strong></span>
         </div>
       </div>
 
@@ -338,13 +338,13 @@ Thank you for using OTESS System!
               >
                 <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-5 relative overflow-hidden">
                   
-                  {/* Distinct Status Pill Header with Live Date Tracker */}
+                  {/* Distinct Status Pill Header with Live Database Date */}
                   <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800/80">
-                    <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                      <Sparkles size={13} className="text-[#2563eb]" />
-                      <span>Instant Ledger Check</span>
+                    <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <Sparkles size={14} className="text-[#2563eb]" />
+                      <span>Live Database Check</span>
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       <span>Updated: {todayFormatted}</span>
                     </span>
