@@ -535,70 +535,46 @@ Thank you for using OTESS System!
                     )}
 
                     {(singleResult.status === 'not_found' || singleResult.status === 'invalid') && (
-                      <div className="bg-amber-50/90 dark:bg-amber-950/30 border border-amber-400/60 dark:border-amber-800/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm text-center">
-                        <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto">
-                          <Clock size={32} className="text-amber-600 dark:text-amber-400" />
-                        </div>
-                        
-                        <div>
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 rounded-full text-xs font-bold mb-2">
-                            <Check size={12} className="text-amber-600" />
-                            <span>AUTOMATICALLY SUBMITTED</span>
-                          </span>
-                          <h2 className="text-xl font-bold text-slate-900 dark:text-white font-outfit">
-                            Number Submitted For Verification
-                          </h2>
-                          <p className="text-sm text-slate-600 dark:text-slate-300 font-medium pt-1">
-                            Your number <strong className="font-mono text-slate-900 dark:text-white">{formatPhoneDisplay(singlePhone)}</strong> has been automatically picked and submitted to our OTESS verification team for approval!
-                          </p>
+                      <motion.div 
+                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        className="p-5 bg-amber-50 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/80 rounded-2xl text-center space-y-3 shadow-sm"
+                      >
+                        <div className="flex items-center justify-center space-x-2 text-amber-700 dark:text-amber-300">
+                          <Clock className="w-5 h-5 flex-shrink-0 text-amber-500" />
+                          <span className="font-bold text-sm font-outfit">🟡 Submission Received</span>
                         </div>
 
-                        {/* Submission Details Card */}
-                        <div className="bg-white/90 dark:bg-slate-900/90 rounded-2xl p-4 border border-amber-200 dark:border-amber-900/40 text-left space-y-2 text-xs shadow-sm">
-                          <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 font-semibold">
-                            <span>Status: <span className="text-amber-600 dark:text-amber-400 font-bold">Under Admin Review</span></span>
-                            <span className="text-slate-500">Est: ~72 Hours</span>
-                          </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Our team will review and add your number to the verified database within 24-72 hours.
-                          </p>
-                          {submitSuccess?.submissionId && (
-                            <div className="text-[11px] font-mono text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2 flex justify-between">
-                              <span>Submission ID: <strong className="text-slate-800 dark:text-slate-200">{submitSuccess.submissionId}</strong></span>
-                              <span>Expected: {submitSuccess.expectedDate}</span>
-                            </div>
-                          )}
-                        </div>
+                        <p className="text-xs font-medium text-slate-700 dark:text-slate-200 leading-snug">
+                          Your number <strong className="font-mono font-bold text-slate-900 dark:text-white">{formatPhoneDisplay(singlePhone)}</strong> has been automatically submitted for verification approval.
+                        </p>
 
-                        {/* Post-submission SMS Alert Prompt */}
-                        <div className="bg-white/70 dark:bg-slate-900/70 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 text-left space-y-3 pt-3">
-                          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
-                            <Bell size={15} className="text-[#2563eb]" />
-                            <span>Want to receive an SMS alert when approved?</span>
+                        {submitSuccess?.submissionId && (
+                          <div className="inline-flex items-center gap-2 text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-900/80 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-900/50">
+                            <span>ID: <strong className="text-slate-800 dark:text-slate-200">{submitSuccess.submissionId}</strong></span>
+                            <span>•</span>
+                            <span>Est ~72 hrs</span>
                           </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                            Enter your phone number below to receive an instant SMS notification the moment your number is approved.
-                          </p>
-                          
-                          <form onSubmit={handleSubmitNotVerified} className="flex gap-2 pt-1">
-                            <input
-                              type="text"
-                              value={agentPhoneInput}
-                              onChange={(e) => setAgentPhoneInput(e.target.value)}
-                              placeholder="e.g. 0551234567"
-                              className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-[#2563eb] focus:outline-none"
-                            />
-                            <button
-                              type="submit"
-                              disabled={submittingNow}
-                              className="px-4 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-xl transition-all shadow-md disabled:opacity-50 shrink-0 flex items-center gap-1"
-                            >
-                              <Bell size={13} />
-                              <span>{submittingNow ? 'Registering...' : 'Register Alert'}</span>
-                            </button>
-                          </form>
-                        </div>
-                      </div>
+                        )}
+
+                        {/* Optional SMS Alert input directly inside card */}
+                        <form onSubmit={handleSubmitNotVerified} className="pt-1 flex gap-2">
+                          <input
+                            type="text"
+                            value={agentPhoneInput}
+                            onChange={(e) => setAgentPhoneInput(e.target.value)}
+                            placeholder="Phone number for SMS alert (optional)"
+                            className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-[#2563eb] focus:outline-none"
+                          />
+                          <button
+                            type="submit"
+                            disabled={submittingNow}
+                            className="px-3.5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-xl transition-colors disabled:opacity-50 shrink-0"
+                          >
+                            {submittingNow ? 'Saving...' : 'Set Alert'}
+                          </button>
+                        </form>
+                      </motion.div>
                     )}
                   </motion.div>
                 )}
