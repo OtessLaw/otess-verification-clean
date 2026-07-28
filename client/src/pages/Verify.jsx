@@ -16,26 +16,16 @@ export default function Verify() {
   const [autoVerifyEnabled, setAutoVerifyEnabled] = useState(true);
   const [showQRProof, setShowQRProof] = useState(false);
 
-  const [dbLatestDate, setDbLatestDate] = useState(() => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }));
-
-  useEffect(() => {
-    axios.get('/api/system/latest-date')
-      .then(res => {
-        if (res.data?.latestDate) {
-          setDbLatestDate(res.data.latestDate);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const todayFormatted = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const formatVerifiedDate = (dateStr) => {
-    if (!dateStr) return dbLatestDate;
+    if (!dateStr) return null;
     try {
       const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dbLatestDate;
-      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      if (isNaN(d.getTime())) return null;
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     } catch {
-      return dbLatestDate;
+      return null;
     }
   };
 
@@ -242,7 +232,8 @@ export default function Verify() {
     const phone = singleResult.data?.phoneNumber || singlePhone;
     const formatted = formatPhoneDisplay(phone);
     const dateStr = formatVerifiedDate(singleResult.data?.verifiedDate);
-    const text = `🟢 OTESS VERIFIED: ${formatted}\nVerified Date: ${dateStr}\nStatus: Cleared for Data Bundle Order\nWebsite: https://getmyzta.shop/`;
+    const dateLine = dateStr ? `Verified Date: ${dateStr}\n` : '';
+    const text = `🟢 OTESS VERIFIED: ${formatted}\n${dateLine}Status: Cleared for Data Bundle Order\nWebsite: https://getmyzta.shop/`;
     navigator.clipboard.writeText(text);
     toast.success('Verification proof copied!');
   };
@@ -266,7 +257,7 @@ export default function Verify() {
     if (!singleResult) return;
     const phone = singleResult.data?.phoneNumber || singlePhone;
     const formatted = formatPhoneDisplay(phone);
-    const date = formatVerifiedDate(singleResult.data?.verifiedDate);
+    const dateStr = formatVerifiedDate(singleResult.data?.verifiedDate) || 'System Verified';
     const batchId = singleResult.data?.batchId || 'VERIFIED-OTESS';
 
     const receiptContent = `====================================
@@ -275,7 +266,7 @@ OTESS PHONE NUMBER VERIFICATION RECEIPT
 Status: VERIFIED (GREEN)
 Phone Number: ${phone}
 Formatted Number: ${formatted}
-Verified Date: ${date}
+Verified Date: ${dateStr}
 Batch Reference: ${batchId}
 System: OTESS Instant Verification
 Validation: PASS - Cleared for Data Bundle Order
@@ -311,21 +302,11 @@ Thank you for using OTESS System!
           Verify phone numbers instantly for bulk data bundle orders.
         </p>
 
-        {/* Live Database Box Banner */}
-        <div className="max-w-sm mx-auto mt-4 bg-gradient-to-br from-blue-50/90 to-indigo-50/80 dark:from-blue-950/40 dark:to-slate-900/60 border border-blue-200/80 dark:border-blue-800/60 rounded-2xl p-4.5 text-center shadow-md relative overflow-hidden">
-          <div className="flex items-center justify-center gap-2 mb-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2563eb] dark:text-blue-400">Live Database Active</span>
-          </div>
-          <div className="flex items-center justify-center gap-2 text-slate-900 dark:text-white">
-            <Calendar size={20} className="text-[#2563eb]" />
-            <span className="text-xl font-extrabold font-outfit tracking-tight">
-              {dbLatestDate}
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
-            System Database Verified Up To Date
-          </p>
+        {/* Live Ledger Date Tracker Pill */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-semibold shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          <Calendar size={13} className="text-[#2563eb]" />
+          <span>Live Ledger Date: <strong>{todayFormatted}</strong></span>
         </div>
       </div>
 
@@ -358,15 +339,15 @@ Thank you for using OTESS System!
               >
                 <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-5 relative overflow-hidden">
                   
-                  {/* Distinct Status Pill Header with Live Database Date */}
+                  {/* Distinct Status Pill Header with Live Date Tracker */}
                   <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800/80">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      <Sparkles size={14} className="text-[#2563eb]" />
-                      <span>Live Database Check</span>
+                    <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                      <Sparkles size={13} className="text-[#2563eb]" />
+                      <span>Instant Ledger Check</span>
                     </span>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>Updated: {dbLatestDate}</span>
+                      <span>Updated: {todayFormatted}</span>
                     </span>
                   </div>
 
@@ -499,14 +480,6 @@ Thank you for using OTESS System!
                                 {detectCarrier(singleResult.data?.phoneNumber || singlePhone).name}
                               </span>
                             )}
-                          </div>
-
-                          {/* Live Verified Date Tracker Badge */}
-                          <div className="pt-1">
-                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#16a34a]/15 border border-[#16a34a]/30 text-[#15803d] dark:text-emerald-300 text-xs font-bold shadow-sm">
-                              <Calendar size={13} />
-                              <span>Verified Date: {formatVerifiedDate(singleResult.data?.verifiedDate)}</span>
-                            </span>
                           </div>
 
                           {showQRProof && (
