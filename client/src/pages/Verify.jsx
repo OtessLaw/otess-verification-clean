@@ -302,15 +302,15 @@ Thank you for using OTESS System!
           Verify phone numbers instantly for bulk data bundle orders.
         </p>
 
-        {/* Live Ledger Date Tracker Pill */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-semibold shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          <Calendar size={13} className="text-[#2563eb]" />
-          <span>Live Ledger Date: <strong>{todayFormatted}</strong></span>
+        {/* Live Ledger Date Tracker Pill with Shining Edge */}
+        <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-blue-50/90 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-xs font-bold shimmer-box glowing-edge">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+          <Calendar size={15} className="text-[#2563eb]" />
+          <span>Live Database: <strong>{todayFormatted}</strong></span>
         </div>
       </div>
 
-      <div className="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-xl rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
+      <div className="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-xl rounded-3xl border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden shimmer-box">
         <div className="flex border-b border-slate-100 dark:border-slate-800">
           <button
             onClick={() => setTab('single')}
@@ -337,7 +337,8 @@ Thank you for using OTESS System!
                 transition={{ duration: 0.25 }}
                 className="max-w-md mx-auto space-y-6"
               >
-                <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-5 relative overflow-hidden">
+                {/* Form Card Box with Shining Edge */}
+                <div className="bg-white dark:bg-slate-900/60 rounded-3xl border p-6 space-y-5 relative overflow-hidden shimmer-box glowing-edge">
                   
                   {/* Distinct Status Pill Header with Live Date Tracker */}
                   <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800/80">
@@ -449,7 +450,7 @@ Thank you for using OTESS System!
                   >
                     {singleResult.status === 'verified' && (
                       <div className="space-y-4">
-                        <div className="bg-[#e8f8ec] dark:bg-emerald-950/30 border border-emerald-400/60 dark:border-emerald-800/50 rounded-3xl p-8 text-center space-y-3 shadow-sm relative overflow-hidden">
+                        <div className="bg-[#e8f8ec] dark:bg-emerald-950/30 border border-emerald-400/60 dark:border-emerald-800/50 rounded-3xl p-8 text-center space-y-3 shadow-sm relative overflow-hidden shimmer-green">
                           <div className="absolute top-4 right-4">
                             <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300">
                               <ShieldCheck size={12} className="text-emerald-600" />
