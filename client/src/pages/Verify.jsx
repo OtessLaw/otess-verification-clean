@@ -549,7 +549,7 @@ Thank you for using OTESS System!
                             Number Submitted For Verification
                           </h2>
                           <p className="text-sm text-slate-600 dark:text-slate-300 font-medium pt-1">
-                            Your number <strong className="font-mono text-slate-900 dark:text-white">{formatPhoneDisplay(singlePhone)}</strong> has been automatically submitted to our OTESS admin team for approval!
+                            Your number <strong className="font-mono text-slate-900 dark:text-white">{formatPhoneDisplay(singlePhone)}</strong> has been automatically picked and submitted to our OTESS verification team for approval!
                           </p>
                         </div>
 
