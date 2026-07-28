@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Search, Loader2 } from 'lucide-react';
+import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Search, Loader2, ExternalLink, Radio } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Verify() {
@@ -33,6 +33,19 @@ export default function Verify() {
       return `+${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6, 9)} ${clean.slice(9)}`;
     }
     return phone;
+  };
+
+  // Helper to detect telecom carrier in Ghana
+  const detectCarrier = (phone) => {
+    if (!phone) return null;
+    let local = phone.replace(/\D/g, '');
+    if (local.startsWith('233')) local = '0' + local.slice(3);
+    if ((local.startsWith('2') || local.startsWith('5')) && local.length === 9) local = '0' + local;
+
+    if (/^(024|054|055|059|025|053)/.test(local)) return { name: 'MTN Ghana', color: 'bg-amber-400/15 text-amber-800 dark:text-amber-300 border-amber-400/30' };
+    if (/^(020|050)/.test(local)) return { name: 'Telecel Ghana', color: 'bg-rose-500/15 text-rose-800 dark:text-rose-300 border-rose-400/30' };
+    if (/^(027|057|026|056)/.test(local)) return { name: 'AirtelTigo', color: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-400/30' };
+    return null;
   };
 
   // Helper to test if input forms a complete phone number format
@@ -145,6 +158,15 @@ export default function Verify() {
     toast.success('Results copied to clipboard!');
   };
 
+  const copyProofText = () => {
+    if (!singleResult) return;
+    const phone = singleResult.data?.phoneNumber || singlePhone;
+    const formatted = formatPhoneDisplay(phone);
+    const text = `🟢 OTESS VERIFIED: ${formatted}\nStatus: Cleared for Data Bundle Order\nWebsite: https://getmyzta.shop/`;
+    navigator.clipboard.writeText(text);
+    toast.success('Verification proof copied!');
+  };
+
   const downloadCSV = () => {
     if (!bulkResult?.results) return;
     const csv = ['Phone Number,Status,Date']
@@ -241,9 +263,17 @@ Thank you for using OTESS System!
                 <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-5">
                   <form onSubmit={handleVerifySingle} className="space-y-4">
                     <div>
-                      <label className="block text-base font-semibold text-slate-800 dark:text-slate-200 mb-2.5">
-                        Mobile number
-                      </label>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <label className="block text-base font-semibold text-slate-800 dark:text-slate-200">
+                          Mobile number
+                        </label>
+                        {detectCarrier(singlePhone) && (
+                          <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${detectCarrier(singlePhone).color}`}>
+                            <Radio size={10} className="animate-pulse" />
+                            <span>{detectCarrier(singlePhone).name}</span>
+                          </span>
+                        )}
+                      </div>
                       <div className="relative">
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                           <Search size={20} />
@@ -306,10 +336,10 @@ Thank you for using OTESS System!
                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     className="space-y-4"
                   >
-                    {/* VERIFIED STATE - Matches Screenshot Exactly */}
+                    {/* VERIFIED STATE - Matches Screenshot Exactly + Extra Features */}
                     {singleResult.status === 'verified' && (
                       <div className="space-y-4">
-                        <div className="bg-[#e8f8ec] dark:bg-emerald-950/30 border border-emerald-400/60 dark:border-emerald-800/50 rounded-3xl p-8 text-center space-y-3 shadow-sm">
+                        <div className="bg-[#e8f8ec] dark:bg-emerald-950/30 border border-emerald-400/60 dark:border-emerald-800/50 rounded-3xl p-8 text-center space-y-3 shadow-sm relative overflow-hidden">
                           {/* Multi-ring Centered Check Badge */}
                           <div className="w-20 h-20 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
                             <div className="w-14 h-14 rounded-full bg-[#16a34a] flex items-center justify-center shadow-lg shadow-emerald-500/30">
@@ -325,9 +355,16 @@ Thank you for using OTESS System!
                             Go ahead and place your order.
                           </p>
 
-                          <p className="text-base font-mono font-bold text-slate-500 dark:text-slate-400 tracking-widest pt-1">
-                            {formatPhoneDisplay(singleResult.data?.phoneNumber || singlePhone)}
-                          </p>
+                          <div className="flex items-center justify-center gap-2 pt-1">
+                            <p className="text-base font-mono font-bold text-slate-500 dark:text-slate-400 tracking-widest">
+                              {formatPhoneDisplay(singleResult.data?.phoneNumber || singlePhone)}
+                            </p>
+                            {detectCarrier(singleResult.data?.phoneNumber || singlePhone) && (
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${detectCarrier(singleResult.data?.phoneNumber || singlePhone).color}`}>
+                                {detectCarrier(singleResult.data?.phoneNumber || singlePhone).name}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* Download Receipt Button */}
@@ -340,6 +377,26 @@ Thank you for using OTESS System!
                           <Download size={20} />
                           <span>Download Receipt</span>
                         </motion.button>
+
+                        {/* Secondary Action Row: Copy Proof & Place Order Link */}
+                        <div className="grid grid-cols-2 gap-3 pt-1">
+                          <button
+                            onClick={copyProofText}
+                            className="w-full py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                          >
+                            <Copy size={14} />
+                            <span>Copy Proof</span>
+                          </button>
+                          <a
+                            href="https://getmyzta.shop/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                          >
+                            <span>Place Order</span>
+                            <ExternalLink size={14} />
+                          </a>
+                        </div>
                       </div>
                     )}
 
