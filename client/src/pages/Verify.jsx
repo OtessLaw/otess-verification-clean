@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Search, Loader2, ExternalLink, Radio } from 'lucide-react';
+import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Search, Loader2, ExternalLink, Radio, QrCode, Sparkles, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Verify() {
@@ -14,6 +14,16 @@ export default function Verify() {
   const [submittingNow, setSubmittingNow] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(null);
   const [autoVerifyEnabled, setAutoVerifyEnabled] = useState(true);
+  const [showQRProof, setShowQRProof] = useState(false);
+
+  const [recentSearches, setRecentSearches] = useState(() => {
+    try {
+      const saved = localStorage.getItem('otess_recent_searches');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const lastVerifiedPhoneRef = useRef('');
 
@@ -21,6 +31,18 @@ export default function Verify() {
   const [bulkResult, setBulkResult] = useState(null);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkError, setBulkError] = useState(null);
+
+  const saveRecentSearch = (phoneNum) => {
+    if (!phoneNum) return;
+    setRecentSearches(prev => {
+      const filtered = prev.filter(p => p !== phoneNum);
+      const updated = [phoneNum, ...filtered].slice(0, 3);
+      try {
+        localStorage.setItem('otess_recent_searches', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
 
   // Helper to format phone display e.g. 053 435 9912
   const formatPhoneDisplay = (phone) => {
@@ -66,7 +88,9 @@ export default function Verify() {
     setSingleResult(null);
     setSingleError(null);
     setSubmitSuccess(null);
+    setShowQRProof(false);
     lastVerifiedPhoneRef.current = target;
+    saveRecentSearch(target);
 
     try {
       const res = await axios.post('/api/verify/single', { phoneNumber: target });
@@ -260,7 +284,20 @@ Thank you for using OTESS System!
                 className="max-w-md mx-auto space-y-6"
               >
                 {/* Form matching mockup */}
-                <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-5">
+                <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-5 relative overflow-hidden">
+                  
+                  {/* Distinct Status Pill Header */}
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800/80">
+                    <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                      <Sparkles size={13} className="text-[#2563eb]" />
+                      <span>Instant Ledger Check</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>System Active</span>
+                    </span>
+                  </div>
+
                   <form onSubmit={handleVerifySingle} className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-2.5">
@@ -292,6 +329,28 @@ Thank you for using OTESS System!
                           </div>
                         )}
                       </div>
+
+                      {/* Recent Search Chips Feature */}
+                      {recentSearches.length > 0 && !singlePhone && (
+                        <div className="flex items-center gap-1.5 pt-2 overflow-x-auto text-[11px]">
+                          <span className="text-slate-400 flex items-center gap-1 shrink-0">
+                            <History size={11} /> Recent:
+                          </span>
+                          {recentSearches.map((num, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setSinglePhone(num);
+                                executeVerifySingle(num);
+                              }}
+                              className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-mono transition-colors shrink-0"
+                            >
+                              {formatPhoneDisplay(num)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <motion.button
@@ -340,6 +399,15 @@ Thank you for using OTESS System!
                     {singleResult.status === 'verified' && (
                       <div className="space-y-4">
                         <div className="bg-[#e8f8ec] dark:bg-emerald-950/30 border border-emerald-400/60 dark:border-emerald-800/50 rounded-3xl p-8 text-center space-y-3 shadow-sm relative overflow-hidden">
+                          
+                          {/* Distinct Official Security Stamp */}
+                          <div className="absolute top-4 right-4">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300">
+                              <ShieldCheck size={12} className="text-emerald-600" />
+                              <span>OTESS STAMP</span>
+                            </span>
+                          </div>
+
                           {/* Multi-ring Centered Check Badge */}
                           <div className="w-20 h-20 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
                             <div className="w-14 h-14 rounded-full bg-[#16a34a] flex items-center justify-center shadow-lg shadow-emerald-500/30">
@@ -365,6 +433,20 @@ Thank you for using OTESS System!
                               </span>
                             )}
                           </div>
+
+                          {/* Expandable Digital QR Proof Toggle */}
+                          {showQRProof && (
+                            <motion.div 
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              className="pt-3 pb-1 border-t border-emerald-500/20 space-y-2 text-center"
+                            >
+                              <div className="w-28 h-28 mx-auto bg-white p-2 rounded-2xl shadow-inner flex items-center justify-center border border-slate-200">
+                                <QrCode size={90} className="text-slate-800" />
+                              </div>
+                              <p className="text-[10px] text-slate-500 font-mono">Scan QR for instant verification proof</p>
+                            </motion.div>
+                          )}
                         </div>
 
                         {/* Download Receipt Button */}
@@ -378,23 +460,32 @@ Thank you for using OTESS System!
                           <span>Download Receipt</span>
                         </motion.button>
 
-                        {/* Secondary Action Row: Copy Proof & Place Order Link */}
-                        <div className="grid grid-cols-2 gap-3 pt-1">
+                        {/* Distinct Action Bar */}
+                        <div className="grid grid-cols-3 gap-2 pt-1">
                           <button
                             onClick={copyProofText}
-                            className="w-full py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                            className="py-2.5 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1 shadow-sm"
                           >
-                            <Copy size={14} />
+                            <Copy size={13} />
                             <span>Copy Proof</span>
                           </button>
+
+                          <button
+                            onClick={() => setShowQRProof(!showQRProof)}
+                            className="py-2.5 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1 shadow-sm"
+                          >
+                            <QrCode size={13} />
+                            <span>{showQRProof ? 'Hide QR' : 'QR Proof'}</span>
+                          </button>
+
                           <a
                             href="https://getmyzta.shop/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                            className="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1 shadow-sm"
                           >
                             <span>Place Order</span>
-                            <ExternalLink size={14} />
+                            <ExternalLink size={12} />
                           </a>
                         </div>
                       </div>
