@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Search, Loader2, ExternalLink, Radio, QrCode, Sparkles, History, Bell } from 'lucide-react';
+import { ShieldCheck, Check, X, Clock, Download, Copy, AlertCircle, Upload, UserCheck, Search, Loader2, ExternalLink, Radio, QrCode, Sparkles, History, Bell, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Verify() {
@@ -15,6 +15,19 @@ export default function Verify() {
   const [submitSuccess, setSubmitSuccess] = useState(null);
   const [autoVerifyEnabled, setAutoVerifyEnabled] = useState(true);
   const [showQRProof, setShowQRProof] = useState(false);
+
+  const todayFormatted = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const formatVerifiedDate = (dateStr) => {
+    if (!dateStr) return todayFormatted;
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return todayFormatted;
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return todayFormatted;
+    }
+  };
 
   const [recentSearches, setRecentSearches] = useState(() => {
     try {
@@ -107,7 +120,7 @@ export default function Verify() {
             submissionId: subRes.data?.data?.submissionId || 'SUBMITTED',
             expectedDate
           });
-          toast.success(`Number automatically picked and submitted for verification!`);
+          toast.success(`Number automatically submitted for verification!`);
         } catch (subErr) {
           const existingSubId = subErr.response?.data?.submissionId || 'PENDING-SUBMISSION';
           const expectedDate = new Date(Date.now() + 72 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -218,7 +231,8 @@ export default function Verify() {
     if (!singleResult) return;
     const phone = singleResult.data?.phoneNumber || singlePhone;
     const formatted = formatPhoneDisplay(phone);
-    const text = `🟢 OTESS VERIFIED: ${formatted}\nStatus: Cleared for Data Bundle Order\nWebsite: https://getmyzta.shop/`;
+    const dateStr = formatVerifiedDate(singleResult.data?.verifiedDate);
+    const text = `🟢 OTESS VERIFIED: ${formatted}\nVerified Date: ${dateStr}\nStatus: Cleared for Data Bundle Order\nWebsite: https://getmyzta.shop/`;
     navigator.clipboard.writeText(text);
     toast.success('Verification proof copied!');
   };
@@ -242,7 +256,7 @@ export default function Verify() {
     if (!singleResult) return;
     const phone = singleResult.data?.phoneNumber || singlePhone;
     const formatted = formatPhoneDisplay(phone);
-    const date = new Date(singleResult.data?.verifiedDate || Date.now()).toLocaleString();
+    const date = formatVerifiedDate(singleResult.data?.verifiedDate);
     const batchId = singleResult.data?.batchId || 'VERIFIED-OTESS';
 
     const receiptContent = `====================================
@@ -251,7 +265,7 @@ OTESS PHONE NUMBER VERIFICATION RECEIPT
 Status: VERIFIED (GREEN)
 Phone Number: ${phone}
 Formatted Number: ${formatted}
-Verification Date: ${date}
+Verified Date: ${date}
 Batch Reference: ${batchId}
 System: OTESS Instant Verification
 Validation: PASS - Cleared for Data Bundle Order
@@ -283,9 +297,16 @@ Thank you for using OTESS System!
           <ShieldCheck className="inline-block mr-2 text-[#2563eb]" size={36} />
           OTESS Phone Number Verification
         </h1>
-        <p className="text-slate-500 dark:text-slate-400">
+        <p className="text-slate-500 dark:text-slate-400 mb-3">
           Verify phone numbers instantly for bulk data bundle orders.
         </p>
+
+        {/* Live Ledger Date Tracker Pill */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-semibold shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          <Calendar size={13} className="text-[#2563eb]" />
+          <span>Live Ledger Date: <strong>{todayFormatted}</strong></span>
+        </div>
       </div>
 
       <div className="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-xl rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
@@ -317,6 +338,7 @@ Thank you for using OTESS System!
               >
                 <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-5 relative overflow-hidden">
                   
+                  {/* Distinct Status Pill Header with Live Date Tracker */}
                   <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800/80">
                     <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                       <Sparkles size={13} className="text-[#2563eb]" />
@@ -324,7 +346,7 @@ Thank you for using OTESS System!
                     </span>
                     <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>System Active</span>
+                      <span>Updated: {todayFormatted}</span>
                     </span>
                   </div>
 
@@ -457,6 +479,14 @@ Thank you for using OTESS System!
                                 {detectCarrier(singleResult.data?.phoneNumber || singlePhone).name}
                               </span>
                             )}
+                          </div>
+
+                          {/* Live Verified Date Tracker Badge */}
+                          <div className="pt-1">
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#16a34a]/15 border border-[#16a34a]/30 text-[#15803d] dark:text-emerald-300 text-xs font-bold shadow-sm">
+                              <Calendar size={13} />
+                              <span>Verified Date: {formatVerifiedDate(singleResult.data?.verifiedDate)}</span>
+                            </span>
                           </div>
 
                           {showQRProof && (
