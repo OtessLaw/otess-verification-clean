@@ -92,6 +92,33 @@ export default function Verify() {
     try {
       const res = await axios.post('/api/verify/single', { phoneNumber: target });
       setSingleResult(res.data);
+
+      if (res.data?.status === 'not_found' || res.data?.status === 'invalid') {
+        const notifyNum = agentPhoneInput || target;
+        try {
+          const subRes = await axios.post('/api/submit/single', {
+            customerNumber: target,
+            phoneNumber: target,
+            agentNumber: notifyNum
+          });
+          const expectedDate = new Date(Date.now() + 72 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+          setSubmitSuccess({
+            autoSubmitted: true,
+            submissionId: subRes.data?.data?.submissionId || 'SUBMITTED',
+            expectedDate
+          });
+          toast.success(`Number automatically picked and submitted for verification!`);
+        } catch (subErr) {
+          const existingSubId = subErr.response?.data?.submissionId || 'PENDING-SUBMISSION';
+          const expectedDate = new Date(Date.now() + 72 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+          setSubmitSuccess({
+            autoSubmitted: true,
+            alreadyPending: true,
+            submissionId: existingSubId,
+            expectedDate
+          });
+        }
+      }
     } catch (err) {
       setSingleError(err.response?.data?.message || 'Verification failed');
     } finally {
@@ -152,12 +179,13 @@ export default function Verify() {
       });
       const expectedDate = new Date(Date.now() + 72 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       setSubmitSuccess({
+        autoSubmitted: true,
         submissionId: res.data?.data?.submissionId || 'SUBMITTED',
         expectedDate
       });
-      toast.success(`Request submitted! SMS alert registered for ${agentPhoneInput}`);
+      toast.success(`Updated alert number to ${agentPhoneInput}!`);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Submission failed');
+      toast.error(err.response?.data?.message || 'Submission update failed');
     } finally {
       setSubmittingNow(false);
     }
@@ -507,87 +535,61 @@ Thank you for using OTESS System!
                     )}
 
                     {(singleResult.status === 'not_found' || singleResult.status === 'invalid') && (
-                      <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-400/60 dark:border-rose-800/50 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm text-center">
-                        <div className="w-16 h-16 rounded-full bg-rose-500/20 flex items-center justify-center mx-auto">
-                          <X size={32} className="text-rose-600 dark:text-rose-400" />
+                      <div className="bg-amber-50/90 dark:bg-amber-950/30 border border-amber-400/60 dark:border-amber-800/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm text-center">
+                        <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto">
+                          <Clock size={32} className="text-amber-600 dark:text-amber-400" />
                         </div>
                         
                         <div>
-                          <h2 className="text-xl font-bold text-slate-900 dark:text-white font-outfit mb-1">
-                            Number Not Verified
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 rounded-full text-xs font-bold mb-2">
+                            <Sparkles size={12} className="text-amber-500 animate-pulse" />
+                            <span>AUTO-SUBMITTED FOR APPROVAL</span>
+                          </span>
+                          <h2 className="text-xl font-bold text-slate-900 dark:text-white font-outfit">
+                            Number Taken For Verification
                           </h2>
-                          <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
-                            <span className="font-mono font-bold text-rose-600 dark:text-rose-400">{formatPhoneDisplay(singlePhone)}</span> is not in the OTESS database yet.
+                          <p className="text-sm text-slate-600 dark:text-slate-300 font-medium pt-1">
+                            Your number <strong className="font-mono text-slate-900 dark:text-white">{formatPhoneDisplay(singlePhone)}</strong> has been automatically picked and submitted to our OTESS admin team for approval!
                           </p>
                         </div>
 
-                        {submitSuccess ? (
-                          <motion.div 
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="p-5 bg-emerald-500/15 border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 rounded-3xl text-xs space-y-2.5 text-left"
-                          >
-                            <h4 className="font-bold text-sm flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
-                              <Check size={18} className="text-emerald-500" /> 🎉 Submission Queued & SMS Alert Active!
-                            </h4>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                              Your number has been submitted to OTESS admins for approval.
-                            </p>
-                            <p className="text-xs text-slate-600 dark:text-slate-300">
-                              You will receive an instant SMS notification at <strong className="font-mono bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-900 dark:text-emerald-200">{agentPhoneInput}</strong> as soon as your number is verified.
-                            </p>
-                            <div className="text-[11px] font-semibold pt-2 border-t border-emerald-500/20 flex justify-between items-center">
-                              <span>Submission ID: <span className="font-mono text-emerald-700 dark:text-emerald-400">{submitSuccess.submissionId}</span></span>
-                              <span className="text-emerald-600 dark:text-emerald-400">Est: ~72 hrs</span>
-                            </div>
-                          </motion.div>
-                        ) : (
-                          <div className="bg-white/90 dark:bg-slate-900/90 rounded-2xl p-5 border border-rose-200/80 dark:border-rose-900/40 text-left space-y-3.5 shadow-sm">
-                            <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
-                              <Bell size={16} className="text-[#2563eb] animate-bounce" />
-                              <span>Get SMS Alert When Verified</span>
-                            </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                              Submit this number for admin approval and receive an SMS notification automatically once approved.
-                            </p>
-                            
-                            <form onSubmit={handleSubmitNotVerified} className="space-y-3 pt-1">
-                              <div>
-                                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                                  Your Notification Phone Number
-                                </label>
-                                <input
-                                  type="text"
-                                  value={agentPhoneInput}
-                                  onChange={(e) => setAgentPhoneInput(e.target.value)}
-                                  placeholder="Enter Phone Number for SMS Alert"
-                                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-3 text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-[#2563eb] focus:outline-none"
-                                  required
-                                />
-                              </div>
-
-                              <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                type="submit"
-                                disabled={submittingNow}
-                                className="w-full py-3.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-bold rounded-full flex items-center justify-center space-x-2 transition-all shadow-md shadow-[#2563eb]/20 disabled:opacity-50"
-                              >
-                                {submittingNow ? (
-                                  <>
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    <span>Submitting Request...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Bell className="w-4 h-4" />
-                                    <span>Submit & Alert Me When Verified</span>
-                                  </>
-                                )}
-                              </motion.button>
-                            </form>
+                        <div className="bg-white/90 dark:bg-slate-900/90 rounded-2xl p-4 border border-amber-200 dark:border-amber-900/40 text-left space-y-2 text-xs shadow-sm">
+                          <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 font-semibold">
+                            <span>Status: <span className="text-amber-600 dark:text-amber-400 font-bold">Under Admin Review</span></span>
+                            <span className="text-slate-500">Est: ~72 Hours</span>
                           </div>
-                        )}
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Our team will process and add your number to the verified database within 24-72 hours.
+                          </p>
+                          {submitSuccess?.submissionId && (
+                            <div className="text-[11px] font-mono text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2 flex justify-between">
+                              <span>Submission ID: <strong className="text-slate-800 dark:text-slate-200">{submitSuccess.submissionId}</strong></span>
+                              <span>Expected: {submitSuccess.expectedDate}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <form onSubmit={handleSubmitNotVerified} className="space-y-2 pt-1 text-left">
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            SMS Alert Phone Number (For Notifications)
+                          </label>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={agentPhoneInput}
+                              onChange={(e) => setAgentPhoneInput(e.target.value)}
+                              placeholder="Enter phone for SMS alert"
+                              className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-[#2563eb] focus:outline-none"
+                            />
+                            <button
+                              type="submit"
+                              disabled={submittingNow}
+                              className="px-4 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-xl transition-all shadow-md disabled:opacity-50 shrink-0"
+                            >
+                              {submittingNow ? 'Updating...' : 'Update Alert'}
+                            </button>
+                          </div>
+                        </form>
                       </div>
                     )}
                   </motion.div>
