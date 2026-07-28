@@ -542,24 +542,25 @@ Thank you for using OTESS System!
                         
                         <div>
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 rounded-full text-xs font-bold mb-2">
-                            <Sparkles size={12} className="text-amber-500 animate-pulse" />
-                            <span>AUTO-SUBMITTED FOR APPROVAL</span>
+                            <Check size={12} className="text-amber-600" />
+                            <span>AUTOMATICALLY SUBMITTED</span>
                           </span>
                           <h2 className="text-xl font-bold text-slate-900 dark:text-white font-outfit">
-                            Number Taken For Verification
+                            Number Submitted For Verification
                           </h2>
                           <p className="text-sm text-slate-600 dark:text-slate-300 font-medium pt-1">
-                            Your number <strong className="font-mono text-slate-900 dark:text-white">{formatPhoneDisplay(singlePhone)}</strong> has been automatically picked and submitted to our OTESS admin team for approval!
+                            Your number <strong className="font-mono text-slate-900 dark:text-white">{formatPhoneDisplay(singlePhone)}</strong> has been automatically submitted to our OTESS admin team for approval!
                           </p>
                         </div>
 
+                        {/* Submission Details Card */}
                         <div className="bg-white/90 dark:bg-slate-900/90 rounded-2xl p-4 border border-amber-200 dark:border-amber-900/40 text-left space-y-2 text-xs shadow-sm">
                           <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 font-semibold">
                             <span>Status: <span className="text-amber-600 dark:text-amber-400 font-bold">Under Admin Review</span></span>
                             <span className="text-slate-500">Est: ~72 Hours</span>
                           </div>
                           <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Our team will process and add your number to the verified database within 24-72 hours.
+                            Our team will review and add your number to the verified database within 24-72 hours.
                           </p>
                           {submitSuccess?.submissionId && (
                             <div className="text-[11px] font-mono text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2 flex justify-between">
@@ -569,27 +570,34 @@ Thank you for using OTESS System!
                           )}
                         </div>
 
-                        <form onSubmit={handleSubmitNotVerified} className="space-y-2 pt-1 text-left">
-                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            SMS Alert Phone Number (For Notifications)
-                          </label>
-                          <div className="flex gap-2">
+                        {/* Post-submission SMS Alert Prompt */}
+                        <div className="bg-white/70 dark:bg-slate-900/70 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 text-left space-y-3 pt-3">
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                            <Bell size={15} className="text-[#2563eb]" />
+                            <span>Want to receive an SMS alert when approved?</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                            Enter your phone number below to receive an instant SMS notification the moment your number is approved.
+                          </p>
+                          
+                          <form onSubmit={handleSubmitNotVerified} className="flex gap-2 pt-1">
                             <input
                               type="text"
                               value={agentPhoneInput}
                               onChange={(e) => setAgentPhoneInput(e.target.value)}
-                              placeholder="Enter phone for SMS alert"
+                              placeholder="e.g. 0551234567"
                               className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-[#2563eb] focus:outline-none"
                             />
                             <button
                               type="submit"
                               disabled={submittingNow}
-                              className="px-4 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-xl transition-all shadow-md disabled:opacity-50 shrink-0"
+                              className="px-4 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-xl transition-all shadow-md disabled:opacity-50 shrink-0 flex items-center gap-1"
                             >
-                              {submittingNow ? 'Updating...' : 'Update Alert'}
+                              <Bell size={13} />
+                              <span>{submittingNow ? 'Registering...' : 'Register Alert'}</span>
                             </button>
-                          </div>
-                        </form>
+                          </form>
+                        </div>
                       </div>
                     )}
                   </motion.div>
