@@ -296,7 +296,14 @@ const trackSubmission = async (req, res) => {
 // @route   GET /api/system/latest-date
 const getLatestVerifiedDate = async (req, res) => {
   try {
+    const SMSConfig = require('../models/SMSConfig');
     const UploadBatch = require('../models/UploadBatch');
+    
+    const config = await SMSConfig.findOne().sort({ updatedAt: -1 });
+    if (config?.liveTrackerDate && config.liveTrackerDate.trim() !== '') {
+      return res.status(200).json({ success: true, latestDate: config.liveTrackerDate.trim() });
+    }
+
     const latestVerified = await VerifiedNumber.findOne().sort({ uploadDate: -1, verifiedDate: -1, createdAt: -1 });
     const latestBatch = await UploadBatch.findOne().sort({ createdAt: -1, date: -1 });
 

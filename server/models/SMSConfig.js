@@ -22,6 +22,10 @@ const SMSConfigSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  liveTrackerDate: {
+    type: String,
+    default: ''
+  },
   updatedBy: {
     type: String,
     default: 'Admin'

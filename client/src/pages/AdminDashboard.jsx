@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CheckCircle, Clock, XCircle, Layers, Upload, TrendingUp } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, Layers, Upload, TrendingUp, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
@@ -9,10 +9,37 @@ const AdminDashboard = () => {
   const [recentBatches, setRecentBatches] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [customTrackerDate, setCustomTrackerDate] = useState('');
+  const [savingDate, setSavingDate] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
+    fetchLiveTrackerDate();
   }, []);
+
+  const fetchLiveTrackerDate = async () => {
+    try {
+      const res = await axios.get('/api/system/latest-date');
+      if (res.data?.latestDate) {
+        setCustomTrackerDate(res.data.latestDate);
+      }
+    } catch {}
+  };
+
+  const handleUpdateLiveTrackerDate = async (e) => {
+    e.preventDefault();
+    try {
+      setSavingDate(true);
+      const res = await axios.post('/api/admin/live-tracker-date', { liveTrackerDate: customTrackerDate });
+      if (res.data.success) {
+        toast.success(`Live Tracker date updated to: "${customTrackerDate || 'Auto'}"`);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update Live Tracker date');
+    } finally {
+      setSavingDate(false);
+    }
+  };
 
   const fetchDashboardData = async (retries = 2) => {
     try {
@@ -25,7 +52,6 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       if (retries > 0) {
-        // Wait 400ms and retry if token was initializing on fresh load
         setTimeout(() => fetchDashboardData(retries - 1), 400);
         return;
       }
@@ -50,9 +76,44 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-outfit text-2xl font-bold text-slate-900 dark:text-white">Dashboard Overview</h1>
-        <p className="text-slate-500 dark:text-slate-400">Welcome back. Here is what's happening today.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-outfit text-2xl font-bold text-slate-900 dark:text-white">Dashboard Overview</h1>
+          <p className="text-slate-500 dark:text-slate-400">Welcome back. Here is what's happening today.</p>
+        </div>
+      </div>
+
+      {/* Live Database Date Control Banner */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white rounded-2xl p-6 shadow-lg space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold text-blue-200 uppercase tracking-wider mb-1">
+              <Calendar size={15} />
+              <span>Live Database Tracker Control</span>
+            </div>
+            <h2 className="font-outfit text-xl font-bold">Public Verification Date</h2>
+            <p className="text-xs text-blue-100/90 mt-0.5">
+              Set the exact verification date displayed to users on the main Live Database Box.
+            </p>
+          </div>
+
+          <form onSubmit={handleUpdateLiveTrackerDate} className="flex items-center gap-2 sm:self-center">
+            <input
+              type="text"
+              value={customTrackerDate}
+              onChange={(e) => setCustomTrackerDate(e.target.value)}
+              placeholder="e.g. 27 July 2026"
+              className="bg-white/20 border border-white/30 rounded-xl px-4 py-2 text-sm font-semibold text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 w-48 sm:w-56"
+            />
+            <button
+              type="submit"
+              disabled={savingDate}
+              className="px-4 py-2 bg-white text-[#2563eb] hover:bg-blue-50 text-xs font-extrabold rounded-xl transition-all shadow-md shrink-0 disabled:opacity-50"
+            >
+              {savingDate ? 'Saving...' : 'Update Date'}
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">

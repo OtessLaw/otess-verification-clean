@@ -43,7 +43,8 @@ const {
   getSMSGatewayConfig,
   saveSMSGatewayConfig,
   testSMSGateway,
-  bulkAddVerifiedNumbers
+  bulkAddVerifiedNumbers,
+  updateLiveTrackerDate
 } = require('../controllers/adminController');
 
 // Ensure uploads directory exists
@@ -132,6 +133,7 @@ router.get('/admin/logs', protect, getActivityLogs);
 router.get('/admin/sms-config', protect, getSMSGatewayConfig);
 router.post('/admin/sms-config', protect, saveSMSGatewayConfig);
 router.post('/admin/sms-config/test', protect, testSMSGateway);
+router.post('/admin/live-tracker-date', protect, updateLiveTrackerDate);
 
 module.exports = router;
 

@@ -743,6 +743,33 @@ const bulkMarkProcessingPending = async (req, res) => {
   }
 };
 
+// @desc    Update Live Tracker verification date manually (Admin)
+// @route   POST /api/admin/live-tracker-date
+const updateLiveTrackerDate = async (req, res) => {
+  try {
+    const SMSConfig = require('../models/SMSConfig');
+    const { liveTrackerDate } = req.body;
+    let config = await SMSConfig.findOne();
+    if (!config) {
+      config = new SMSConfig();
+    }
+    config.liveTrackerDate = liveTrackerDate || '';
+    config.updatedBy = req.admin?.name || req.admin?.email || 'Admin';
+    await config.save();
+
+    await ActivityLog.create({
+      admin: req.admin?.name || 'Admin',
+      action: 'UPDATE_LIVE_TRACKER_DATE',
+      description: `Updated Live Tracker date to: ${liveTrackerDate || 'Auto'}`
+    });
+
+    res.status(200).json({ success: true, message: 'Live Tracker date updated successfully.', liveTrackerDate: config.liveTrackerDate });
+  } catch (err) {
+    console.error('updateLiveTrackerDate error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getVerifiedNumbers,
@@ -764,6 +791,7 @@ module.exports = {
   getSMSGatewayConfig,
   saveSMSGatewayConfig,
   testSMSGateway,
-  bulkAddVerifiedNumbers
+  bulkAddVerifiedNumbers,
+  updateLiveTrackerDate
 };
 
