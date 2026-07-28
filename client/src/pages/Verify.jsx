@@ -301,11 +301,21 @@ Thank you for using OTESS System!
           Verify phone numbers instantly for bulk data bundle orders.
         </p>
 
-        {/* Live Database Date Tracker Pill - Prominent & Bigger */}
-        <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm font-bold shadow-sm">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-          <Calendar size={16} className="text-[#2563eb]" />
-          <span>Live Database: <strong className="font-mono text-[#2563eb] dark:text-blue-400">{todayFormatted}</strong></span>
+        {/* Live Database Box Banner */}
+        <div className="max-w-sm mx-auto mt-4 bg-gradient-to-br from-blue-50/90 to-indigo-50/80 dark:from-blue-950/40 dark:to-slate-900/60 border border-blue-200/80 dark:border-blue-800/60 rounded-2xl p-4.5 text-center shadow-md relative overflow-hidden">
+          <div className="flex items-center justify-center gap-2 mb-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#2563eb] dark:text-blue-400">Live Database Active</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 text-slate-900 dark:text-white">
+            <Calendar size={20} className="text-[#2563eb]" />
+            <span className="text-xl font-extrabold font-outfit tracking-tight">
+              {todayFormatted}
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            System Database Verified Up To Date
+          </p>
         </div>
       </div>
 
