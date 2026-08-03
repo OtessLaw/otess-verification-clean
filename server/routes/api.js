@@ -135,5 +135,37 @@ router.post('/admin/sms-config', protect, saveSMSGatewayConfig);
 router.post('/admin/sms-config/test', protect, testSMSGateway);
 router.post('/admin/live-tracker-date', protect, updateLiveTrackerDate);
 
+// ==========================================
+// DATA GIVEAWAY SYSTEM ENDPOINTS
+// ==========================================
+const { getSettings, toggleGiveaway, verifyPurchases, verifyCode, claimReward } = require('../controllers/giveawayController');
+const { generateCodes, getCodes, deleteCode } = require('../controllers/codeController');
+const { uploadGiveawayNumbers, getGiveawayNumbers, deleteGiveawayNumber } = require('../controllers/numberController');
+const { getClaims, deleteClaim, exportClaimsCSV } = require('../controllers/claimController');
+
+// Public Giveaway Endpoints
+router.get('/system/settings', getSettings);
+router.post('/giveaway/verify-purchases', verifyPurchases);
+router.post('/giveaway/verify-code', verifyCode);
+router.post('/giveaway/claim-reward', claimReward);
+
+// Admin Master Toggle & Settings
+router.post('/admin/toggle-giveaway', protect, toggleGiveaway);
+
+// Admin OTESS Claim Code Management
+router.post('/admin/codes/generate', protect, generateCodes);
+router.get('/admin/codes', protect, getCodes);
+router.delete('/admin/codes/:id', protect, deleteCode);
+
+// Admin Giveaway Claims Management
+router.get('/admin/giveaway-claims', protect, getClaims);
+router.get('/admin/giveaway-claims/export/csv', protect, exportClaimsCSV);
+router.delete('/admin/giveaway-claims/:id', protect, deleteClaim);
+
+// Admin Giveaway Customer Number Upload
+router.post('/admin/giveaway-numbers/upload', protect, upload.single('file'), uploadGiveawayNumbers);
+router.get('/admin/giveaway-numbers', protect, getGiveawayNumbers);
+router.delete('/admin/giveaway-numbers/:id', protect, deleteGiveawayNumber);
+
 module.exports = router;
 

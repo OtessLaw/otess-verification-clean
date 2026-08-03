@@ -16,6 +16,10 @@ import AdminSMSConfig from './pages/AdminSMSConfig';
 import AdminUpload from './pages/AdminUpload';
 import AdminBatches from './pages/AdminBatches';
 import AdminLogs from './pages/AdminLogs';
+import GiveawayPage from './pages/GiveawayPage';
+import CodeManagement from './pages/CodeManagement';
+import AdminGiveawayNumbers from './pages/AdminGiveawayNumbers';
+import AdminGiveawayClaims from './pages/AdminGiveawayClaims';
 
 function PublicLayout() {
   return (
@@ -66,6 +70,7 @@ export default function App() {
           <Route path="submit" element={<SubmitNumber />} />
           <Route path="track" element={<Track />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="giveaway" element={<GiveawayPage />} />
           <Route path="login" element={<Login />} />
         </Route>
         
@@ -73,6 +78,9 @@ export default function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="verified" element={<AdminVerified />} />
           <Route path="pending" element={<AdminPending />} />
+          <Route path="codes" element={<CodeManagement />} />
+          <Route path="giveaway-numbers" element={<AdminGiveawayNumbers />} />
+          <Route path="giveaway-claims" element={<AdminGiveawayClaims />} />
           <Route path="sms-config" element={<AdminSMSConfig />} />
           <Route path="upload" element={<AdminUpload />} />
           <Route path="batches" element={<AdminBatches />} />
