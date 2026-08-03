@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { motion } from 'framer-motion';
-import { ShieldCheck, Gift, Search, FileSpreadsheet, Zap, ArrowRight, Activity, CheckCircle, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Gift, Search, FileSpreadsheet, Zap, ArrowRight, CheckCircle, Sparkles } from 'lucide-react';
 
 export default function Home() {
   const [giveawayActive, setGiveawayActive] = useState(false);
@@ -18,31 +17,22 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative overflow-hidden py-12 sm:py-20">
+    <div className="relative py-12 sm:py-20">
       
-      {/* Dynamic Background Glow Blobs */}
+      {/* Background Glow Blobs */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[500px] bg-gradient-to-b from-blue-600/20 via-indigo-600/10 to-transparent blur-3xl pointer-events-none -z-10" />
 
-      <motion.section 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-5xl mx-auto px-4 space-y-14"
-      >
+      <section className="max-w-5xl mx-auto px-4 space-y-14">
         
         {/* HERO SECTION */}
         <div className="text-center space-y-6 max-w-3xl mx-auto">
           
           {/* Neon Animated Pill Badge */}
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="inline-flex items-center space-x-2.5 px-5 py-2 bg-blue-500/10 dark:bg-blue-900/30 border border-blue-500/30 rounded-full text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 neon-badge shadow-lg"
-          >
+          <div className="inline-flex items-center space-x-2.5 px-5 py-2 bg-blue-500/10 dark:bg-blue-900/30 border border-blue-500/30 rounded-full text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 neon-badge shadow-lg">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
             <ShieldCheck className="w-4 h-4 text-blue-500" />
             <span>OTESS Verification System • MTN Ghana</span>
-          </motion.div>
+          </div>
 
           {/* Hero Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-white font-outfit leading-[1.1]">
@@ -90,11 +80,7 @@ export default function Home() {
 
         {/* PROMOTIONAL DATA GIVEAWAY CARD (ONLY WHEN ACTIVATED BY ADMIN) */}
         {giveawayActive && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="glass-panel rounded-3xl p-8 border-2 border-amber-400/50 text-center space-y-4 shadow-2xl max-w-2xl mx-auto relative overflow-hidden"
-          >
+          <div className="glass-panel rounded-3xl p-8 border-2 border-amber-400/50 text-center space-y-4 shadow-2xl max-w-2xl mx-auto relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none"></div>
 
             <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-400/20 text-amber-600 dark:text-amber-400 border border-amber-400/40 text-xs font-black uppercase tracking-widest">
@@ -107,7 +93,7 @@ export default function Home() {
             </h3>
 
             <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
-              Enter 2 customer data purchases today & your OTESS Claim Code to redeem free MTN data.
+              Enter customer data purchases today & your OTESS Claim Code to redeem free MTN data.
             </p>
 
             <div className="pt-2">
@@ -119,7 +105,7 @@ export default function Home() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* 3 HIGH-CONTRAST FEATURE CARDS */}
@@ -151,7 +137,7 @@ export default function Home() {
 
         </div>
 
-      </motion.section>
+      </section>
     </div>
   );
 }

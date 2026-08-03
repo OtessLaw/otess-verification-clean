@@ -23,11 +23,13 @@ import AdminGiveawayClaims from './pages/AdminGiveawayClaims';
 
 function PublicLayout() {
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/30 dark:from-[#0f172a] dark:via-[#1e1b4b]/40 dark:to-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div className="flex flex-col min-h-screen relative bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/30 dark:from-[#0f172a] dark:via-[#1e1b4b]/40 dark:to-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors duration-300">
       {/* Background Glow Blobs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-400/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
-      <div className="absolute top-1/3 right-10 w-96 h-96 bg-indigo-400/15 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
-      <div className="absolute bottom-10 left-10 w-80 h-80 bg-sky-300/15 dark:bg-sky-600/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-400/15 dark:bg-blue-600/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 right-10 w-96 h-96 bg-indigo-400/15 dark:bg-indigo-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-sky-300/15 dark:bg-sky-600/10 rounded-full blur-3xl" />
+      </div>
 
       <Navbar />
       <main className="flex-grow w-full relative z-10">
