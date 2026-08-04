@@ -43,14 +43,12 @@ app.use('/api/', apiLimiter);
 // Routes
 app.use('/api', apiRoutes);
 
-// Locate frontend static assets — check all possible paths
+// Locate frontend static assets — ONLY check build dist directories
 const possiblePaths = [
   path.join(__dirname, '..', 'client', 'dist'),   // server/app.js → client/dist
-  path.join(__dirname, '..', 'dist'),              // server/app.js → dist
-  path.join(__dirname, '..'),                      // server/app.js → root (index.html at root)
   path.join(process.cwd(), 'client', 'dist'),      // cwd → client/dist
+  path.join(__dirname, '..', 'dist'),              // server/app.js → dist
   path.join(process.cwd(), 'dist'),                // cwd → dist
-  path.join(process.cwd()),                        // cwd root (index.html at root)
 ];
 
 let clientBuildPath = null;
@@ -63,13 +61,25 @@ for (const p of possiblePaths) {
 }
 
 if (clientBuildPath) {
-  app.use(express.static(clientBuildPath));
+  app.use(express.static(clientBuildPath, {
+    maxAge: '1d',
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
+    }
+  }));
 }
 
-// SPA fallback — any non-API route serves index.html
+// SPA fallback — any non-API route serves index.html with no-cache headers
 app.get('*', (req, res) => {
   if (clientBuildPath) {
     const indexPath = path.join(clientBuildPath, 'index.html');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(indexPath);
   } else {
     res.status(200).send(`
