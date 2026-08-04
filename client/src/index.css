@@ -8,11 +8,12 @@
   html {
     background-color: #0f172a;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   body {
     background-color: #0f172a;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    @apply text-slate-100 min-h-screen antialiased selection:bg-amber-400 selection:text-slate-950 transition-colors duration-300;
+    @apply text-slate-100 min-h-screen antialiased selection:bg-amber-400 selection:text-slate-950;
   }
 
   body.light-theme {
@@ -27,6 +28,8 @@
   *, ::before, ::after {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
   }
 }
 

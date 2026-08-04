@@ -19,9 +19,6 @@ export default function Home() {
   return (
     <div className="relative py-12 sm:py-20">
       
-      {/* Background Glow Blobs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[500px] bg-gradient-to-b from-blue-600/20 via-indigo-600/10 to-transparent blur-3xl pointer-events-none -z-10" />
-
       <section className="max-w-5xl mx-auto px-4 space-y-14">
         
         {/* HERO SECTION */}
@@ -29,7 +26,7 @@ export default function Home() {
           
           {/* Neon Animated Pill Badge */}
           <div className="inline-flex items-center space-x-2.5 px-5 py-2 bg-blue-500/10 dark:bg-blue-900/30 border border-blue-500/30 rounded-full text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 neon-badge shadow-lg">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
             <ShieldCheck className="w-4 h-4 text-blue-500" />
             <span>OTESS Verification System • MTN Ghana</span>
           </div>
@@ -81,7 +78,6 @@ export default function Home() {
         {/* PROMOTIONAL DATA GIVEAWAY CARD (ONLY WHEN ACTIVATED BY ADMIN) */}
         {giveawayActive && (
           <div className="glass-panel rounded-3xl p-8 border-2 border-amber-400/50 text-center space-y-4 shadow-2xl max-w-2xl mx-auto relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none"></div>
 
             <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-400/20 text-amber-600 dark:text-amber-400 border border-amber-400/40 text-xs font-black uppercase tracking-widest">
               <Sparkles className="w-4 h-4 text-amber-500" />
