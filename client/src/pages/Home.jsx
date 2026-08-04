@@ -60,7 +60,7 @@ export default function Home() {
 
             <Link
               to="/submit"
-              className="w-full sm:w-auto px-8 py-4 bg-white/80 dark:bg-slate-900/80 hover:bg-white dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-2xl font-black transition-all text-center flex items-center justify-center space-x-2 text-base shadow-lg backdrop-blur-xl"
+              className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-2xl font-black transition-all text-center flex items-center justify-center space-x-2 text-base shadow-lg"
             >
               <FileSpreadsheet className="w-5 h-5 text-blue-500" />
               <span>Submit Request</span>

@@ -297,12 +297,7 @@ Thank you for using OTESS System!
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="max-w-4xl mx-auto p-4 sm:p-6"
-    >
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
       <div className="text-center mb-8 sm:mb-10">
         <h1 className="text-3xl font-bold mb-3 font-outfit text-slate-900 dark:text-white">
           <ShieldCheck className="inline-block mr-2 text-[#2563eb]" size={36} />
@@ -313,7 +308,7 @@ Thank you for using OTESS System!
         </p>
 
         {/* Live Database Box Banner with Shining Edge */}
-        <div className="max-w-sm mx-auto mt-4 bg-gradient-to-br from-blue-50/90 to-indigo-50/80 dark:from-blue-950/40 dark:to-slate-900/60 p-4.5 rounded-2xl text-center shadow-md relative overflow-hidden shimmer-box glowing-edge">
+        <div className="max-w-sm mx-auto mt-4 bg-gradient-to-br from-blue-50/90 to-indigo-50/80 dark:from-blue-950/40 dark:to-slate-900/60 p-4.5 rounded-2xl text-center shadow-md relative overflow-hidden">
           <div className="flex items-center justify-center gap-2 mb-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
             <span className="text-xs font-bold uppercase tracking-wider text-[#2563eb] dark:text-blue-400">Live Database Active</span>
@@ -330,7 +325,7 @@ Thank you for using OTESS System!
         </div>
       </div>
 
-      <div className="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-xl rounded-3xl border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden shimmer-box">
+      <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden">
         <div className="flex border-b border-slate-100 dark:border-slate-800">
           <button
             onClick={() => setTab('single')}
@@ -347,14 +342,9 @@ Thank you for using OTESS System!
         </div>
 
         <div className="p-6 md:p-8">
-          <AnimatePresence mode="wait">
+          <div>
             {tab === 'single' ? (
-              <motion.div 
-                key="single"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.25 }}
+              <div 
                 className="max-w-md mx-auto space-y-6"
               >
                 {/* Form Card Box with Shining Edge */}
@@ -622,15 +612,9 @@ Thank you for using OTESS System!
                     )}
                   </motion.div>
                 )}
-              </motion.div>
+              </div>
             ) : (
-              <motion.div 
-                key="bulk"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.25 }}
-              >
+              <div>
                 <form onSubmit={handleVerifyBulk} className="mb-6">
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Paste Numbers (newlines or commas)
@@ -731,11 +715,11 @@ Thank you for using OTESS System!
                     </div>
                   </motion.div>
                 )}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

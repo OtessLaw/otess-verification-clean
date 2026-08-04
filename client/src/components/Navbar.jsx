@@ -147,7 +147,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800 px-4 py-4 space-y-2">
+        <div className="lg:hidden bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-slate-800 px-4 py-4 space-y-2 shadow-2xl">
           {navLinks.map((link) => (
             <NavLink
               key={link.path}

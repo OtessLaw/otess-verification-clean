@@ -80,12 +80,7 @@ export default function SubmitNumber() {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="max-w-4xl mx-auto p-6"
-    >
+    <div className="max-w-4xl mx-auto p-6">
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold mb-3 font-outfit text-slate-900 dark:text-white">
           <PlusCircle className="inline-block mr-2 text-[#2563eb]" size={36} />
@@ -96,7 +91,7 @@ export default function SubmitNumber() {
         </p>
       </div>
 
-      <div className="bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-xl rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
+      <div className="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
         <div className="flex border-b border-slate-100 dark:border-slate-800">
           <button
             onClick={() => setTab('single')}
@@ -113,14 +108,10 @@ export default function SubmitNumber() {
         </div>
 
         <div className="p-6 md:p-8">
-          <AnimatePresence mode="wait">
+          <div>
             {tab === 'single' ? (
-              <motion.div 
-                key="single"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.25 }}
+              <div 
+                className="space-y-5 mb-6"
               >
                 <form onSubmit={handleSubmitSingle} className="space-y-5 mb-6">
                   {/* Customer Phone Number */}
@@ -203,15 +194,9 @@ export default function SubmitNumber() {
                     <p className="text-xs opacity-75">Thank you for your patience.</p>
                   </motion.div>
                 )}
-              </motion.div>
+              </div>
             ) : (
-              <motion.div 
-                key="bulk"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.25 }}
-              >
+              <div>
                 <form onSubmit={handleSubmitBulk} className="space-y-5 mb-6">
                   {/* Agent Phone Number */}
                   <div>
@@ -289,11 +274,11 @@ export default function SubmitNumber() {
                     <p className="text-xs">Please check back on <strong className="underline">{bulkResult.expectedDate}</strong> for updates.</p>
                   </motion.div>
                 )}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

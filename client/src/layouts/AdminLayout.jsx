@@ -51,7 +51,7 @@ const AdminLayout = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] font-sans text-slate-900 dark:text-slate-100 flex flex-col md:flex-row">
       
       {/* Mobile Header */}
-      <div className="md:hidden bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center z-30 sticky top-0">
+      <div className="md:hidden bg-white dark:bg-[#1e293b] border-b border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center z-30 sticky top-0 shadow-md">
         <div className="flex items-center gap-2.5 font-outfit font-black text-lg text-slate-900 dark:text-white">
           <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md">
             <ShieldCheck size={20} />
@@ -67,7 +67,7 @@ const AdminLayout = () => {
       <aside
         className={`${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 fixed md:static inset-y-0 left-0 w-72 bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-2xl border-r border-slate-200/80 dark:border-slate-800/80 z-20 transition-transform duration-200 ease-in-out flex flex-col shadow-xl`}
+        } md:translate-x-0 fixed md:static inset-y-0 left-0 w-72 bg-white dark:bg-[#1e293b] border-r border-slate-200/80 dark:border-slate-800/80 z-20 transition-transform duration-200 ease-in-out flex flex-col shadow-xl`}
       >
         {/* Brand Header */}
         <div className="p-6 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
