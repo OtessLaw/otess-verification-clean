@@ -4,7 +4,7 @@
   "description": "Backend for OTESS Number Verification System",
   "main": "server/server.js",
   "scripts": {
-    "build": "npm install",
+    "build": "npm install && cd client && npm install && npm run build",
     "start": "node server/server.js",
     "dev": "nodemon server/server.js"
   },
