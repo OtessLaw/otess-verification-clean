@@ -137,7 +137,32 @@ export default function AdminGiveawayClaims() {
       {/* Main Table Panel */}
       <div className="bg-white dark:bg-[#1e293b] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4">
         
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Quick Bulk Copy Action Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+          <div className="flex items-center space-x-2 text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+            <Copy className="w-4 h-4 text-blue-500" />
+            <span>Copy All Recipient Phone Numbers:</span>
+          </div>
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
+            <button
+              onClick={handleCopyBulkLines}
+              className="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all flex items-center justify-center space-x-1.5"
+            >
+              {copyBulkLinesSuccess ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+              <span>{copyBulkLinesSuccess ? 'Copied (Newlines)!' : 'Copy All (Newlines)'}</span>
+            </button>
+
+            <button
+              onClick={handleCopyBulkComma}
+              className="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-md transition-all flex items-center justify-center space-x-1.5"
+            >
+              {copyBulkCommaSuccess ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+              <span>{copyBulkCommaSuccess ? 'Copied (Commas)!' : 'Copy All (Commas)'}</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
           <form onSubmit={(e) => { e.preventDefault(); setPage(1); fetchClaims(); }} className="w-full sm:w-80 relative">
             <input
               type="text"

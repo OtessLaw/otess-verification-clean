@@ -233,18 +233,44 @@ export default function AdminGiveawayNumbers() {
 
       {/* Uploaded Customer Numbers List Table */}
       <div className="bg-white dark:bg-[#1e293b] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <h3 className="font-extrabold text-lg text-slate-900 dark:text-white flex items-center space-x-2">
             <Database className="w-5 h-5 text-blue-500" />
             <span>Uploaded Customer Numbers Log ({total})</span>
           </h3>
 
-          <button
-            onClick={fetchNumbers}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-white"
-          >
-            <RefreshCw className={`w-4 h-4 ${tableLoading ? 'animate-spin' : ''}`} />
-          </button>
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            <button
+              onClick={() => {
+                if (!numbers || numbers.length === 0) return;
+                const text = numbers.map(n => n.phoneNumber).filter(Boolean).join('\n');
+                navigator.clipboard.writeText(text);
+                alert('Copied all numbers (lines) to clipboard!');
+              }}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-md transition-all"
+            >
+              <span>Copy Bulk (Newlines)</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (!numbers || numbers.length === 0) return;
+                const text = numbers.map(n => n.phoneNumber).filter(Boolean).join(', ');
+                navigator.clipboard.writeText(text);
+                alert('Copied all numbers (commas) to clipboard!');
+              }}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md transition-all"
+            >
+              <span>Copy Bulk (Commas)</span>
+            </button>
+
+            <button
+              onClick={fetchNumbers}
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-white"
+            >
+              <RefreshCw className={`w-4 h-4 ${tableLoading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
 
         {tableLoading ? (
