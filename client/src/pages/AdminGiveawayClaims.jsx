@@ -12,13 +12,15 @@ export default function AdminGiveawayClaims() {
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [copiedPhone, setCopiedPhone] = useState(null);
+  const [copyBulkLinesSuccess, setCopyBulkLinesSuccess] = useState(false);
+  const [copyBulkCommaSuccess, setCopyBulkCommaSuccess] = useState(false);
 
   const fetchClaims = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       params.append('page', page);
-      params.append('limit', '20');
+      params.append('limit', '50');
       if (search) params.append('search', search);
       if (statusFilter) params.append('status', statusFilter);
 
@@ -72,28 +74,64 @@ export default function AdminGiveawayClaims() {
     setTimeout(() => setCopiedPhone(null), 2000);
   };
 
+  const handleCopyBulkLines = () => {
+    if (!claims || claims.length === 0) return;
+    const phoneList = claims.map(c => c.claimantNumber).filter(Boolean).join('\n');
+    navigator.clipboard.writeText(phoneList);
+    setCopyBulkLinesSuccess(true);
+    setTimeout(() => setCopyBulkLinesSuccess(false), 2500);
+  };
+
+  const handleCopyBulkComma = () => {
+    if (!claims || claims.length === 0) return;
+    const phoneList = claims.map(c => c.claimantNumber).filter(Boolean).join(', ');
+    navigator.clipboard.writeText(phoneList);
+    setCopyBulkCommaSuccess(true);
+    setTimeout(() => setCopyBulkCommaSuccess(false), 2500);
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center space-x-2">
             <Gift className="w-7 h-7 text-blue-600 dark:text-blue-400" />
             <span>Giveaway Data Orders & Claims ({total})</span>
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Pick recipient phone numbers below to send or order free data bundles for qualified users.
+            Copy recipient phone numbers in bulk below to send data bundle rewards via your vendor portal.
           </p>
         </div>
 
-        <button
-          onClick={handleExportCSV}
-          className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs shadow-lg hover:bg-emerald-700 transition-all"
-        >
-          <Download className="w-4 h-4" />
-          <span>Export Orders (CSV)</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleCopyBulkLines}
+            className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-lg transition-all"
+            title="Copy all recipient numbers separated by lines"
+          >
+            {copyBulkLinesSuccess ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+            <span>{copyBulkLinesSuccess ? 'Copied All (Newlines)!' : 'Copy Bulk (Newlines)'}</span>
+          </button>
+
+          <button
+            onClick={handleCopyBulkComma}
+            className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-lg transition-all"
+            title="Copy all recipient numbers separated by commas"
+          >
+            {copyBulkCommaSuccess ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+            <span>{copyBulkCommaSuccess ? 'Copied All (Comma)!' : 'Copy Bulk (Commas)'}</span>
+          </button>
+
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs shadow-lg hover:bg-emerald-700 transition-all"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export CSV</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Table Panel */}
